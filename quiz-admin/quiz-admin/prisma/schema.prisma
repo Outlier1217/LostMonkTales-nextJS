@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model Quiz {
+  id              String     @id @default(cuid())
+  title           String
+  description     String?
+  difficulty      Difficulty @default(MEDIUM)
+  category        String
+  topic           String
+  timeLimit       Int        // in minutes, 0 = no limit
+  negativeMarking Boolean    @default(false)
+  negativePenalty Float      @default(0.25) // fraction deducted per wrong answer
+  passingPercent  Float      @default(60.0)
+  isPublished     Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  questions       Question[]
+
+  @@map("quizzes")
+}
+
+model Question {
+  id            String   @id @default(cuid())
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionText  String
+  options       Json     // Array of { id: string, text: string }
+  correctAnswer String   // option id
+  explanation   String?
+  marks         Float    @default(1.0)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([quizId])
+  @@map("questions")
+}

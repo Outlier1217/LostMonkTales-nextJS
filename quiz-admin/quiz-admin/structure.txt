@@ -1,0 +1,37 @@
+quiz-admin/
+├── prisma/
+│   └── schema.prisma
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx (redirect to /admin)
+│   │   ├── admin/
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx (dashboard)
+│   │   │   ├── quizzes/
+│   │   │   │   ├── page.tsx (list)
+│   │   │   │   ├── new/page.tsx (create)
+│   │   │   │   └── [id]/
+│   │   │   │       ├── page.tsx (edit quiz)
+│   │   │   │       └── questions/
+│   │   │   │           ├── page.tsx (list questions)
+│   │   │   │           ├── new/page.tsx
+│   │   │   │           └── import/page.tsx (CSV/Excel import)
+│   │   └── api/
+│   │       ├── quizzes/route.ts
+│   │       ├── quizzes/[id]/route.ts
+│   │       ├── questions/route.ts
+│   │       ├── questions/[id]/route.ts
+│   │       └── import/route.ts
+│   ├── components/
+│   │   ├── ui/ (shared)
+│   │   ├── QuizForm.tsx
+│   │   ├── QuestionForm.tsx
+│   │   ├── QuestionList.tsx
+│   │   └── ImportModal.tsx
+│   └── lib/
+│       ├── db.ts
+│       └── utils.ts
+├── .env.local
+├── package.json
+└── tailwind.config.ts
