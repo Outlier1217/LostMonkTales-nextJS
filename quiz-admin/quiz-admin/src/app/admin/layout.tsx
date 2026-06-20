@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpen, LayoutDashboard, ListChecks } from 'lucide-react'
+import { BookOpen, LayoutDashboard, ListChecks, FileText } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -24,6 +24,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/quizzes" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-all">
             <ListChecks className="w-4 h-4" />
             All Quizzes
+          </Link>
+          <Link href="/admin/blogs" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-all">
+            <BookOpen className="w-4 h-4" />
+            <FileText className="w-4 h-4" />
+            Blogs
           </Link>
         </nav>
         <div className="p-4 border-t border-gray-800">

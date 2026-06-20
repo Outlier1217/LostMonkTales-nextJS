@@ -48,3 +48,17 @@ model Question {
   @@index([quizId])
   @@map("questions")
 }
+
+model Blog {
+  id          String   @id @default(cuid())
+  title       String
+  category    String
+  topic       String
+  content     String   // markdown/rich text
+  youtubeUrl  String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("blogs")
+}

@@ -7,9 +7,10 @@ import { Plus, BookOpen, CheckCircle, XCircle } from 'lucide-react'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboard() {
-  const [quizzes, totalQuestions] = await Promise.all([
+  const [quizzes, totalQuestions, totalBlogs] = await Promise.all([
     prisma.quiz.findMany({ include: { _count: { select: { questions: true } } }, orderBy: { createdAt: 'desc' }, take: 5 }),
     prisma.question.count(),
+    prisma.blog.count(),           // ← add this
   ])
 
   const stats = {
