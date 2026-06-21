@@ -62,3 +62,31 @@ model Blog {
 
   @@map("blogs")
 }
+
+model ArtCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  artworks    Artwork[]
+
+  @@map("art_categories")
+}
+
+model Artwork {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  price       Float
+  contact     String      // WhatsApp number / email / link
+  images      Json        // String[] — array of image URLs
+  categoryId  String
+  category    ArtCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  isPublished Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([categoryId])
+  @@map("artworks")
+}
