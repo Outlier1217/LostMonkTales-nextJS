@@ -5,6 +5,8 @@ import { PORTRAIT_CATEGORIES } from '@/lib/portrait-categories'
 import DeletePortraitButton from '@/components/portraits/DeletePortraitButton'
 import PublishToggle from '@/components/portraits/PublishToggle'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PortraitsAdminPage() {
   const portraits = await prisma.portrait.findMany({ orderBy: { createdAt: 'desc' } })
 
