@@ -10,19 +10,28 @@ export default async function PortraitsAdminPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-100">Art & Portraits</h1>
-          <p className="text-sm text-gray-500 mt-1">{portraits.length} total entries</p>
-        </div>
-        <Link
-          href="/admin/portraits/new"
-          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Portrait
-        </Link>
-      </div>
+<div className="flex items-center justify-between mb-6">
+  <div>
+    <h1 className="text-xl font-bold text-gray-100">Art & Portraits</h1>
+    <p className="text-sm text-gray-500 mt-1">{portraits.length} total entries</p>
+  </div>
+  <div className="flex gap-2">
+    <Link
+      href="/admin/portraits/bulk"
+      className="flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-300 text-sm font-medium rounded-lg transition-colors"
+    >
+      <Plus className="w-4 h-4" />
+      Bulk Upload
+    </Link>
+    <Link
+      href="/admin/portraits/new"
+      className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg transition-colors"
+    >
+      <Plus className="w-4 h-4" />
+      Add Portrait
+    </Link>
+  </div>
+</div>
 
       {PORTRAIT_CATEGORIES.map(({ value, label }) => {
         const items = portraits.filter((p) => p.category === value)
