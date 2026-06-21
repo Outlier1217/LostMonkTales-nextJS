@@ -17,9 +17,9 @@ export default async function NewArtworkPage() {
       {categories.length === 0 ? (
         <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4
           text-sm text-yellow-300">
-          Pehle ek category banao.{' '}
+          Please Create Categories First.{' '}
           <Link href="/admin/art/categories/new" className="underline font-medium">
-            Category add karo →
+            Add Categories →
           </Link>
         </div>
       ) : (
