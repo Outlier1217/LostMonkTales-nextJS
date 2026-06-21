@@ -109,3 +109,26 @@ model Portrait {
   @@index([category])
   @@map("portraits")
 }
+
+enum ArchitectureCategory {
+  INTERIOR
+  COMMERCIAL
+  RESIDENTIAL
+}
+
+model ArchitectureProject {
+  id          String               @id @default(cuid())
+  title       String
+  description String?
+  location    String?
+  size        String?
+  price       String?
+  category    ArchitectureCategory
+  images      Json                 // String[] — array of image URLs, Artwork jaisa
+  isPublished Boolean              @default(false)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([category])
+  @@map("architecture_projects")
+}
