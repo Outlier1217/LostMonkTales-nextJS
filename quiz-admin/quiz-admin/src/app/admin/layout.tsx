@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { BookOpen, LayoutDashboard, ListChecks, Palette, FileText, Building2,  Image as ImageIcon } from 'lucide-react'
+import LogoutButton from "@/components/ui/LogoutButton"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -66,6 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       <main className="flex-1 overflow-auto p-6">{children}</main>
+      <LogoutButton />
     </div>
   )
 }
