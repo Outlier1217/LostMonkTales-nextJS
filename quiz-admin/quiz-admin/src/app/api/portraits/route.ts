@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const category = searchParams.get('category')
   const publishedOnly = searchParams.get('published') === 'true'
 
-  const portraits = await db.portrait.findMany({
+  const portraits = await prisma.portrait.findMany({
     where: {
       ...(category ? { category: category as any } : {}),
       ...(publishedOnly ? { isPublished: true } : {}),
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'title, image and category are required' }, { status: 400 })
     }
 
-    const portrait = await db.portrait.create({
+    const portrait = await prisma.portrait.create({
       data: { title, image, category, isPublished: !!isPublished },
     })
 
