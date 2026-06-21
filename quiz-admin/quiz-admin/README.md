@@ -1,132 +1,169 @@
 # Quiz Admin Panel
 
-A full-stack content management system built with Next.js 14, TypeScript, Prisma, and PostgreSQL (Neon), designed to manage Quizzes, Blogs, Art Store products, and Art & Portrait galleries from a single admin dashboard.
+A full-stack content management system built with **Next.js 14**, **TypeScript**, **Prisma**, and **PostgreSQL (Neon)** for managing educational content, blogs, artwork, portraits, and architecture projects from a single admin dashboard.
 
-The platform uses a self-hosted VPS file server for image storage and supports deployment via PM2 on a Hostinger VPS.
+The platform uses a self-hosted VPS file server for media storage and is deployed on a Hostinger VPS using PM2.
 
 ---
 
-# Modules Overview
+## Features
 
-The system currently contains four major modules:
+### Quiz Management
 
-## 1. Quiz Management
-
-Create, manage, publish, and organize quizzes with advanced configuration options.
-
-### Features
-
-* Create quizzes
-* Difficulty levels (Easy / Medium / Hard)
+* Create and manage quizzes
+* Easy / Medium / Hard difficulty levels
 * Categories and topics
 * Time limits
 * Negative marking support
 * Passing percentage configuration
 * Publish / unpublish quizzes
 * Manual question creation
-* CSV and Excel bulk import
+* CSV / XLS / XLSX bulk import
 * Question explanations
 * Up to 8 answer options (A–H)
 
-### Question Import Support
+### Blog Management
 
-Supported formats:
-
-* CSV
-* XLSX
-* XLS
-
-Required columns:
-
-| Column        |
-| ------------- |
-| questionText  |
-| option1       |
-| option2       |
-| option3       |
-| option4       |
-| correctAnswer |
-
-Optional:
-
-| Column          |
-| --------------- |
-| option5-option8 |
-| explanation     |
-| marks           |
-
----
-
-## 2. Blog Management
-
-A lightweight blogging system built directly into the admin panel.
-
-### Features
-
-* Create blog posts
+* Create and edit blog posts
 * Draft & publish workflow
-* Category and topic support
+* Categories and topics
 * Markdown/plain text content
 * YouTube video embedding
 * Edit/Delete blogs
 
-### YouTube Support
-
-Supported formats:
-
-* youtube.com/watch
-* youtu.be
-* youtube.com/live
-* youtube.com/shorts
-
-The system initially loads a thumbnail and only renders the iframe player when clicked.
-
----
-
-## 3. Art Store
-
-An e-commerce style gallery for selling artwork.
-
-Unlike the Portraits module, Art Store includes:
-
-* Admin-created categories
-* Pricing
-* Contact information
-* Multiple images per artwork
-
-### Features
+### Art Store
 
 * Category management
 * Multiple image uploads
-* Artwork pricing
-* Contact-to-buy workflow
-* Publish/unpublish
+* Pricing and contact information
+* Publish/unpublish workflow
 * Public storefront
 
-### Workflow
+### Art & Portraits Gallery
 
-1. Create category
-2. Create artwork
-3. Upload images
-4. Enter details
-5. Publish
+* Single or bulk uploads
+* Fixed portrait categories
+* Publish/unpublish support
+* Public gallery with category filtering
 
-Public page:
-
-```
-/store
-```
-
-### Database Models
+Categories:
 
 ```prisma
-model ArtCategory {
-  id          String @id @default(cuid())
-  name        String @unique
-  slug        String @unique
-  description String?
+enum PortraitCategory {
+  PENCIL_PORTRAITS
+  PAINTING
+  OIL_ACRYLIC_PORTRAITS
 }
+```
 
+### Architecture Projects
+
+Portfolio showcase module for:
+
+* Interior Projects
+* Commercial Projects
+* Residential Projects
+
+Features:
+
+* Multiple image uploads
+* Project pricing
+* Location and size metadata
+* Publish/unpublish workflow
+* Admin management interface
+
+Categories:
+
+```prisma
+enum ArchitectureCategory {
+  INTERIOR
+  COMMERCIAL
+  RESIDENTIAL
+}
+```
+
+---
+
+## Technology Stack
+
+| Layer           | Technology                  |
+| --------------- | --------------------------- |
+| Framework       | Next.js 14 (App Router)     |
+| Language        | TypeScript                  |
+| Database        | PostgreSQL (Neon)           |
+| ORM             | Prisma                      |
+| Styling         | Tailwind CSS                |
+| Icons           | Lucide React                |
+| Package Manager | pnpm                        |
+| File Storage    | Self-hosted VPS File Server |
+| Process Manager | PM2                         |
+
+---
+
+## Project Structure
+
+```text
+src/
+├── app/
+│   ├── admin/
+│   │   ├── quizzes/
+│   │   ├── blogs/
+│   │   ├── art/
+│   │   ├── portraits/
+│   │   └── architecture/
+│   ├── store/
+│   ├── art-portraits/
+│   ├── architecture/
+│   └── api/
+├── components/
+│   ├── art/
+│   ├── portraits/
+│   ├── architecture/
+│   ├── blogs/
+│   └── ui/
+├── prisma/
+└── lib/
+```
+
+---
+
+## Image Storage Architecture
+
+All media uploads are stored on a dedicated VPS file server.
+
+```text
+Next.js App
+      |
+      v
+/api/upload
+      |
+      v
+VPS File Server (3021)
+      |
+      v
+Stored Files
+```
+
+### Ports
+
+```text
+Application: 3030
+File Server: 3021
+```
+
+### Upload Directory
+
+```bash
+/var/www/art-uploads/files
+```
+
+---
+
+## Database Models
+
+### Artwork
+
+```prisma
 model Artwork {
   id          String @id @default(cuid())
   title       String
@@ -139,75 +176,7 @@ model Artwork {
 }
 ```
 
----
-
-## 4. Art & Portraits Gallery
-
-A simplified gallery module designed specifically for showcasing hand-crafted portraits.
-
-Unlike Art Store:
-
-* No pricing
-* No contact details
-* No category management
-* One image per entry
-* Fixed categories
-
-### Categories
-
-```prisma
-enum PortraitCategory {
-  PENCIL_PORTRAITS
-  PAINTING
-  OIL_ACRYLIC_PORTRAITS
-}
-```
-
-### Features
-
-* Single upload
-* Bulk upload
-* Publish/unpublish
-* Category filtering
-* Public portrait gallery
-
-### Workflow
-
-#### Single Upload
-
-1. Open
-
-```
-/admin/portraits/new
-```
-
-2. Enter title
-3. Select category
-4. Upload image
-5. Publish (optional)
-
-#### Bulk Upload
-
-1. Open
-
-```
-/admin/portraits/bulk
-```
-
-2. Select category
-3. Upload multiple images
-4. Edit auto-generated titles
-5. Save all entries
-
-#### Public Gallery
-
-```
-/art-portraits
-```
-
-Only published portraits are displayed.
-
-### Portrait Model
+### Portrait
 
 ```prisma
 model Portrait {
@@ -221,86 +190,30 @@ model Portrait {
 }
 ```
 
----
+### Architecture Project
 
-# Technology Stack
+```prisma
+model ArchitectureProject {
+  id          String               @id @default(cuid())
+  title       String
+  description String?
+  location    String?
+  size        String?
+  price       String?
+  category    ArchitectureCategory
+  images      Json
+  isPublished Boolean              @default(false)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
 
-| Layer           | Technology                  |
-| --------------- | --------------------------- |
-| Framework       | Next.js 14 (App Router)     |
-| Language        | TypeScript                  |
-| Database        | PostgreSQL (Neon)           |
-| ORM             | Prisma v5                   |
-| Styling         | Tailwind CSS                |
-| Icons           | Lucide React                |
-| Package Manager | pnpm                        |
-| File Storage    | Self-hosted VPS File Server |
-| Process Manager | PM2                         |
-
----
-
-# Project Structure
-
-```text
-src/
-├── app/
-│   ├── admin/
-│   │   ├── quizzes/
-│   │   ├── blogs/
-│   │   ├── art/
-│   │   └── portraits/
-│   ├── store/
-│   ├── art-portraits/
-│   └── api/
-├── components/
-│   ├── blogs/
-│   ├── art/
-│   ├── portraits/
-│   └── ui/
-├── lib/
-└── prisma/
+  @@index([category])
+  @@map("architecture_projects")
+}
 ```
 
 ---
 
-# Image Storage Architecture
-
-All image uploads are stored on a dedicated VPS file server.
-
-```text
-Next.js App
-      |
-      v
-/api/upload
-      |
-      v
-VPS File Server (3021)
-      |
-      v
-Stored Images
-```
-
-### File Server Port
-
-```text
-3021
-```
-
-### Application Port
-
-```text
-3030
-```
-
-### Uploaded Files Location
-
-```bash
-/var/www/art-uploads/files
-```
-
----
-
-# Environment Variables
+## Environment Variables
 
 ```env
 DATABASE_URL=postgresql://...
@@ -309,7 +222,7 @@ FILE_SERVER_URL=http://localhost:3021
 
 ---
 
-# Local Development
+## Local Development
 
 Install dependencies:
 
@@ -329,7 +242,7 @@ Push schema:
 pnpm db:push
 ```
 
-Run development server:
+Start development server:
 
 ```bash
 pnpm dev
@@ -337,23 +250,25 @@ pnpm dev
 
 ---
 
-# VPS Deployment
+## VPS Deployment
 
 ```bash
 cd /var/www/lostmonktales/quiz-admin/quiz-admin
 
 git pull
 
-pnpm install
+pnpm db:generate
 
 pnpm build
 
 pm2 restart quiz-admin
 ```
 
+> Run `pnpm install` only when new dependencies are added.
+
 ---
 
-# PM2
+## PM2
 
 Start application:
 
@@ -361,7 +276,7 @@ Start application:
 pm2 start "pnpm start" --name quiz-admin
 ```
 
-Save configuration:
+Save PM2 configuration:
 
 ```bash
 pm2 save
@@ -369,89 +284,62 @@ pm2 save
 
 ---
 
-# Production Notes
+## Production Notes
 
-## Dynamic Rendering
+### Dynamic Rendering
 
-Pages that directly query Prisma must use:
+Pages that directly query Prisma should use:
 
 ```ts
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic"
 ```
 
-Examples:
+Example:
 
 ```ts
-/admin/portraits/page.tsx
-/art-portraits/page.tsx
 /admin/art/page.tsx
+/admin/portraits/page.tsx
+/admin/architecture/page.tsx
+/art-portraits/page.tsx
 ```
 
-Without this, Next.js may statically cache pages and new database records will not appear after deployment.
+This prevents stale cached data after deployment.
 
 ---
 
-# Known Issues & Fixes
+## Common Issues
 
-## 1. Prisma Export Naming
+### Prisma Import
 
 Correct:
 
 ```ts
-import { prisma } from '@/lib/db'
+import { prisma } from "@/lib/db"
 ```
 
 Incorrect:
 
 ```ts
-import { db } from '@/lib/db'
+import { db } from "@/lib/db"
 ```
 
----
+### Empty Files
 
-## 2. Empty Component Files
+Always verify files before committing to avoid accidental 0-byte files.
 
-Always verify file contents before committing.
+### PM2 Port Conflicts
 
-A 0-byte file can compile incorrectly and create confusing production issues.
-
----
-
-## 3. Static Build Cache
-
-Fixed using:
-
-```ts
-export const dynamic = 'force-dynamic'
-```
-
----
-
-## 4. PM2 Port Confusion
-
-If package.json contains:
+If `package.json` contains:
 
 ```json
 "start": "next start -p 3030"
 ```
 
-then:
-
-```bash
-PORT=4000 pm2 start "pnpm start"
-```
-
-will still run on:
-
-```text
-3030
-```
-
-because the port is hardcoded.
+the application will always run on port `3030`, regardless of the `PORT` environment variable.
 
 ---
 
-# Architecture Summary
+## Architecture Overview
 
 ```text
 Quiz Admin Panel
@@ -460,6 +348,7 @@ Quiz Admin Panel
 ├── Blog Management
 ├── Art Store
 ├── Art & Portraits
+├── Architecture Projects
 │
 ├── Prisma
 ├── PostgreSQL (Neon)
@@ -467,5 +356,3 @@ Quiz Admin Panel
 ├── Next.js 14
 └── PM2 Deployment
 ```
-
-This repository serves as a centralized content and media management platform for educational content, blogging, artwork sales, and portrait gallery publishing.
