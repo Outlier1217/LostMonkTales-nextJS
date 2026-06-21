@@ -4,9 +4,15 @@ import DeleteArtworkButton from '@/components/art/DeleteArtworkButton'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-export default async function EditArtworkPage({ params }: { params: { id: string } }) {
+interface Props {
+  params: Promise<{ id: string }>
+}
+
+export default async function EditArtworkPage({ params }: Props) {
+  const { id } = await params
+
   const [artwork, categories] = await Promise.all([
-    prisma.artwork.findUnique({ where: { id: params.id } }),
+    prisma.artwork.findUnique({ where: { id } }),
     prisma.artCategory.findMany({ orderBy: { name: 'asc' } }),
   ])
 
@@ -16,10 +22,10 @@ export default async function EditArtworkPage({ params }: { params: { id: string
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link href="/admin/art" className="text-sm text-gray-500 hover:text-gray-700">
+          <Link href="/admin/art" className="text-sm text-gray-400 hover:text-gray-200">
             ← Back to Artworks
           </Link>
-          <h1 className="text-2xl font-bold mt-2">Edit Artwork</h1>
+          <h1 className="text-2xl font-bold text-gray-100 mt-2">Edit Artwork</h1>
         </div>
         <DeleteArtworkButton id={artwork.id} />
       </div>
