@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpen, LayoutDashboard, ListChecks, Palette, FileText } from 'lucide-react'
+import { BookOpen, LayoutDashboard, ListChecks, Palette, FileText, Image as ImageIcon } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -45,6 +45,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Palette className="w-4 h-4" />
             Art Store
           </Link>
+          <Link href="/admin/portraits"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm
+            text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-all">
+          <ImageIcon className="w-4 h-4" />
+          Art & Portraits
+        </Link>
         </nav>
 
         <div className="p-4 border-t border-gray-800">

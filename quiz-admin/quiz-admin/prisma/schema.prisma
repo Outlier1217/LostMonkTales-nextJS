@@ -90,3 +90,22 @@ model Artwork {
   @@index([categoryId])
   @@map("artworks")
 }
+
+enum PortraitCategory {
+  PENCIL_PORTRAITS
+  PAINTING
+  OIL_ACRYLIC_PORTRAITS
+}
+
+model Portrait {
+  id          String           @id @default(cuid())
+  title       String
+  image       String           // VPS image URL
+  category    PortraitCategory
+  isPublished Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([category])
+  @@map("portraits")
+}
