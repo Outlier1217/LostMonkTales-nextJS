@@ -1,402 +1,471 @@
 # Quiz Admin Panel
 
-Full-stack admin panel for creating and managing quizzes, blog posts, and an art store. Built with Next.js 14 + TypeScript + Prisma + PostgreSQL (Neon).
+A full-stack content management system built with Next.js 14, TypeScript, Prisma, and PostgreSQL (Neon), designed to manage Quizzes, Blogs, Art Store products, and Art & Portrait galleries from a single admin dashboard.
+
+The platform uses a self-hosted VPS file server for image storage and supports deployment via PM2 on a Hostinger VPS.
 
 ---
 
-## Features
+# Modules Overview
 
-### Quizzes
-- Create quizzes with difficulty (Easy / Medium / Hard), category, topic, time limit, negative marking, passing %
-- Add questions manually one by one with up to 8 options (A–H)
-- Import questions in bulk via CSV or Excel (.xlsx / .xls)
-- Edit / delete quizzes and questions
-- Publish / unpublish quizzes
+The system currently contains four major modules:
 
-### Blogs
-- Create blog posts with category, topic, title, and content (plain text or markdown)
-- Attach an optional YouTube video — shows thumbnail with play button, loads player on click
-- Save as Draft or Publish directly
-- Edit and delete posts with inline confirmation
+## 1. Quiz Management
 
-### Art Store
-- Admin creates categories first (e.g. Watercolor, Acrylic, Digital Art)
-- Add artworks with multiple images, title, description, price, and contact info
-- Images are uploaded directly to a self-hosted VPS file server (port 3021) and served via HTTP
-- Publish / unpublish individual artworks
-- Public store page at `/store` with category filter, image carousel, and "Contact to Buy" reveal button
-- Image proxy route (`/api/img`) for Codespace development — not needed in production
+Create, manage, publish, and organize quizzes with advanced configuration options.
 
----
+### Features
 
-## Tech Stack
+* Create quizzes
+* Difficulty levels (Easy / Medium / Hard)
+* Categories and topics
+* Time limits
+* Negative marking support
+* Passing percentage configuration
+* Publish / unpublish quizzes
+* Manual question creation
+* CSV and Excel bulk import
+* Question explanations
+* Up to 8 answer options (A–H)
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript |
-| Database | PostgreSQL via Neon (serverless) |
-| ORM | Prisma v5 |
-| Styling | Tailwind CSS |
-| Icons | Lucide React |
-| Package Manager | pnpm |
-| File Storage | Self-hosted VPS (Express static server) |
+### Question Import Support
 
----
+Supported formats:
 
-## Quick Start (GitHub Codespaces)
+* CSV
+* XLSX
+* XLS
 
-### 1. Install dependencies
-```bash
-pnpm install
-```
+Required columns:
 
-### 2. Setup environment
-```bash
-cp .env.local.example .env.local
-```
+| Column        |
+| ------------- |
+| questionText  |
+| option1       |
+| option2       |
+| option3       |
+| option4       |
+| correctAnswer |
 
-Edit `.env.local` and set your `DATABASE_URL`:
+Optional:
 
-**Option A — Neon (recommended for Codespaces):**
-```
-DATABASE_URL="postgresql://user:pass@ep-xxx.neon.tech/neondb?sslmode=require"
-```
-
-**Option B — Hostinger VPS Postgres:**
-```
-DATABASE_URL="postgresql://postgres:yourpassword@YOUR_VPS_IP:5432/quiz_db"
-```
-> Make sure port 5432 is open on your VPS: `sudo ufw allow 5432`
-
-### 3. Push schema to DB
-```bash
-pnpm db:generate
-pnpm db:push
-```
-
-Or if using migrations:
-```bash
-npx prisma migrate dev --name init
-npx prisma generate
-```
-
-### 4. Start dev server
-```bash
-pnpm dev
-```
-Opens on port 3030. In Codespaces, forward port 3030.
+| Column          |
+| --------------- |
+| option5-option8 |
+| explanation     |
+| marks           |
 
 ---
 
-## Database Schema
+## 2. Blog Management
 
-### Quiz
+A lightweight blogging system built directly into the admin panel.
+
+### Features
+
+* Create blog posts
+* Draft & publish workflow
+* Category and topic support
+* Markdown/plain text content
+* YouTube video embedding
+* Edit/Delete blogs
+
+### YouTube Support
+
+Supported formats:
+
+* youtube.com/watch
+* youtu.be
+* youtube.com/live
+* youtube.com/shorts
+
+The system initially loads a thumbnail and only renders the iframe player when clicked.
+
+---
+
+## 3. Art Store
+
+An e-commerce style gallery for selling artwork.
+
+Unlike the Portraits module, Art Store includes:
+
+* Admin-created categories
+* Pricing
+* Contact information
+* Multiple images per artwork
+
+### Features
+
+* Category management
+* Multiple image uploads
+* Artwork pricing
+* Contact-to-buy workflow
+* Publish/unpublish
+* Public storefront
+
+### Workflow
+
+1. Create category
+2. Create artwork
+3. Upload images
+4. Enter details
+5. Publish
+
+Public page:
+
+```
+/store
+```
+
+### Database Models
+
 ```prisma
-model Quiz {
-  id              String     @id @default(cuid())
-  title           String
-  description     String?
-  difficulty      Difficulty @default(MEDIUM)
-  category        String
-  topic           String
-  timeLimit       Int        // in minutes, 0 = no limit
-  negativeMarking Boolean    @default(false)
-  negativePenalty Float      @default(0.25)
-  passingPercent  Float      @default(60.0)
-  isPublished     Boolean    @default(false)
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  questions       Question[]
+model ArtCategory {
+  id          String @id @default(cuid())
+  name        String @unique
+  slug        String @unique
+  description String?
 }
-```
 
-### Question
-```prisma
-model Question {
-  id            String   @id @default(cuid())
-  quizId        String
-  questionText  String
-  options       Json     // Array of { id: string, text: string }
-  correctAnswer String
-  explanation   String?
-  marks         Float    @default(1.0)
-  order         Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-```
-
-### Blog
-```prisma
-model Blog {
-  id          String   @id @default(cuid())
+model Artwork {
+  id          String @id @default(cuid())
   title       String
-  category    String
-  topic       String
-  content     String   // markdown/rich text
-  youtubeUrl  String?
-  isPublished Boolean  @default(false)
+  description String?
+  price       Float
+  contact     String
+  images      Json
+  categoryId  String
+  isPublished Boolean @default(false)
+}
+```
+
+---
+
+## 4. Art & Portraits Gallery
+
+A simplified gallery module designed specifically for showcasing hand-crafted portraits.
+
+Unlike Art Store:
+
+* No pricing
+* No contact details
+* No category management
+* One image per entry
+* Fixed categories
+
+### Categories
+
+```prisma
+enum PortraitCategory {
+  PENCIL_PORTRAITS
+  PAINTING
+  OIL_ACRYLIC_PORTRAITS
+}
+```
+
+### Features
+
+* Single upload
+* Bulk upload
+* Publish/unpublish
+* Category filtering
+* Public portrait gallery
+
+### Workflow
+
+#### Single Upload
+
+1. Open
+
+```
+/admin/portraits/new
+```
+
+2. Enter title
+3. Select category
+4. Upload image
+5. Publish (optional)
+
+#### Bulk Upload
+
+1. Open
+
+```
+/admin/portraits/bulk
+```
+
+2. Select category
+3. Upload multiple images
+4. Edit auto-generated titles
+5. Save all entries
+
+#### Public Gallery
+
+```
+/art-portraits
+```
+
+Only published portraits are displayed.
+
+### Portrait Model
+
+```prisma
+model Portrait {
+  id          String @id @default(cuid())
+  title       String
+  image       String
+  category    PortraitCategory
+  isPublished Boolean @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 ```
 
-### ArtCategory
-```prisma
-model ArtCategory {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
-  description String?
-  createdAt   DateTime  @default(now())
-  artworks    Artwork[]
-}
-```
+---
 
-### Artwork
-```prisma
-model Artwork {
-  id          String      @id @default(cuid())
-  title       String
-  description String?
-  price       Float
-  contact     String      // WhatsApp number or email
-  images      Json        // String[] — array of VPS image URLs
-  categoryId  String
-  category    ArtCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  isPublished Boolean     @default(false)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
-```
+# Technology Stack
+
+| Layer           | Technology                  |
+| --------------- | --------------------------- |
+| Framework       | Next.js 14 (App Router)     |
+| Language        | TypeScript                  |
+| Database        | PostgreSQL (Neon)           |
+| ORM             | Prisma v5                   |
+| Styling         | Tailwind CSS                |
+| Icons           | Lucide React                |
+| Package Manager | pnpm                        |
+| File Storage    | Self-hosted VPS File Server |
+| Process Manager | PM2                         |
 
 ---
 
-## File Structure
+# Project Structure
 
-```
+```text
 src/
 ├── app/
 │   ├── admin/
-│   │   ├── page.tsx                      # Dashboard (stats + recent quizzes)
-│   │   ├── layout.tsx                    # Sidebar navigation
 │   │   ├── quizzes/
-│   │   │   ├── page.tsx                  # All quizzes list
-│   │   │   ├── new/page.tsx              # Create quiz
-│   │   │   └── [id]/
-│   │   │       ├── page.tsx              # Edit quiz
-│   │   │       └── questions/            # Manage questions
 │   │   ├── blogs/
-│   │   │   ├── page.tsx                  # Blog list
-│   │   │   ├── new/page.tsx              # Create blog
-│   │   │   └── [id]/edit/page.tsx        # Edit blog
-│   │   └── art/
-│   │       ├── page.tsx                  # Artworks list (admin)
-│   │       ├── new/page.tsx              # Add artwork
-│   │       ├── [id]/edit/page.tsx        # Edit artwork
-│   │       └── categories/
-│   │           ├── page.tsx              # Categories list
-│   │           └── new/page.tsx          # Add category
+│   │   ├── art/
+│   │   └── portraits/
 │   ├── store/
-│   │   ├── page.tsx                      # Public art store (SSR)
-│   │   ├── StoreClient.tsx               # Client: filter + grid
-│   │   └── ArtCard.tsx                   # Image carousel + contact reveal
+│   ├── art-portraits/
 │   └── api/
-│       ├── quizzes/                      # Quiz CRUD endpoints
-│       ├── blogs/                        # Blog CRUD endpoints
-│       ├── art/                          # Artwork CRUD endpoints
-│       │   └── [id]/route.ts
-│       ├── art-categories/               # Category CRUD endpoints
-│       │   └── [id]/route.ts
-│       ├── upload/route.ts               # Proxies file uploads to VPS
-│       └── img/route.ts                  # Image proxy (Codespace dev only)
-└── components/
-    ├── ui/                               # Button, Input, Select, Textarea, Badge
-    ├── blogs/
-    │   ├── BlogForm.tsx
-    │   ├── YoutubeEmbed.tsx
-    │   └── DeleteBlogButton.tsx
-    └── art/
-        ├── ArtworkForm.tsx               # Shared create/edit form
-        ├── ImageUploader.tsx             # Drag-drop multi-image upload to VPS
-        ├── PublishToggle.tsx             # Inline publish/unpublish button
-        ├── DeleteArtworkButton.tsx       # Delete with confirmation
-        └── DeleteCategoryButton.tsx      # Delete with artwork count guard
+├── components/
+│   ├── blogs/
+│   ├── art/
+│   ├── portraits/
+│   └── ui/
+├── lib/
+└── prisma/
 ```
 
 ---
 
-## Art Store API Endpoints
+# Image Storage Architecture
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/art` | Fetch all artworks |
-| `POST` | `/api/art` | Create a new artwork |
-| `GET` | `/api/art/:id` | Fetch single artwork |
-| `PATCH` | `/api/art/:id` | Update an artwork |
-| `DELETE` | `/api/art/:id` | Delete an artwork |
-| `GET` | `/api/art-categories` | Fetch all categories |
-| `POST` | `/api/art-categories` | Create a category |
-| `PATCH` | `/api/art-categories/:id` | Update a category |
-| `DELETE` | `/api/art-categories/:id` | Delete a category |
-| `POST` | `/api/upload` | Upload images to VPS file server |
-| `GET` | `/api/img?url=...` | Image proxy for Codespace dev |
+All image uploads are stored on a dedicated VPS file server.
 
----
+```text
+Next.js App
+      |
+      v
+/api/upload
+      |
+      v
+VPS File Server (3021)
+      |
+      v
+Stored Images
+```
 
-## Blog API Endpoints
+### File Server Port
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/blogs` | Fetch all blogs |
-| `POST` | `/api/blogs` | Create a new blog |
-| `GET` | `/api/blogs/:id` | Fetch single blog |
-| `PATCH` | `/api/blogs/:id` | Update a blog |
-| `DELETE` | `/api/blogs/:id` | Delete a blog |
+```text
+3021
+```
 
----
+### Application Port
 
-## VPS File Server Setup (Art Store Images)
+```text
+3030
+```
 
-Images are stored on a self-hosted Express server on your Hostinger VPS.
-
-### First-time setup on VPS
+### Uploaded Files Location
 
 ```bash
-mkdir -p /var/www/art-uploads/files
-cd /var/www/art-uploads
-npm init -y
-npm install express cors
+/var/www/art-uploads/files
 ```
 
-Create `server.js`:
+---
 
-```javascript
-const express = require('express')
-const cors = require('cors')
-const path = require('path')
-const fs = require('fs')
+# Environment Variables
 
-const app = express()
-app.use(cors())
-app.use('/uploads', express.static('/var/www/art-uploads/files'))
-
-app.post('/upload', express.raw({ type: '*/*', limit: '20mb' }), (req, res) => {
-  const original = req.headers['x-filename'] || `file-${Date.now()}`
-  const ext = path.extname(original)
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`
-  const dir = '/var/www/art-uploads/files'
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-  fs.writeFileSync(path.join(dir, filename), req.body)
-  res.json({ url: `http://YOUR_VPS_IP:3021/uploads/${filename}` })
-})
-
-app.delete('/uploads/:filename', (req, res) => {
-  const filepath = path.join('/var/www/art-uploads/files', req.params.filename)
-  if (fs.existsSync(filepath)) fs.unlinkSync(filepath)
-  res.json({ success: true })
-})
-
-app.listen(3021, () => console.log('Art file server running on port 3021'))
+```env
+DATABASE_URL=postgresql://...
+FILE_SERVER_URL=http://localhost:3021
 ```
 
-Start with PM2:
+---
+
+# Local Development
+
+Install dependencies:
 
 ```bash
-npm install -g pm2
-pm2 start server.js --name art-files
-pm2 save
-sudo ufw allow 3021
+pnpm install
 ```
 
-### Uploaded files location
-```
-/var/www/art-uploads/files/
-```
-
-### Image URLs stored in DB
-```
-http://YOUR_VPS_IP:3021/uploads/1234567890-abc123.jpg
-```
-
----
-
-## Art Store — Admin Workflow
-
-1. Go to `/admin/art/categories/new` — create at least one category
-2. Go to `/admin/art/new` — add an artwork
-3. Upload one or more images (drag & drop or click)
-4. Fill in title, category, description, price, contact
-5. Check "Publish immediately" or leave as draft
-6. Public store is live at `/store`
-
-> **Note on images in Codespace:** Images appear blank in Codespace preview due to cross-origin restrictions. The `/api/img` proxy fixes this for development. In production, images load directly from the VPS URL with no proxy needed.
-
----
-
-## CSV Import Format for Questions
-
-Download `public/sample-questions.csv` as a template.
-
-Required columns:
-
-| Column | Description |
-|---|---|
-| questionText | The question |
-| option1 | First option (= A) |
-| option2 | Second option (= B) |
-| option3 | Third option (= C) |
-| option4 | Fourth option (= D) |
-| correctAnswer | A, B, C, or D |
-
-Optional columns:
-
-| Column | Description |
-|---|---|
-| option5 – option8 | Up to 8 options total |
-| explanation | Why this answer is correct |
-| marks | Points for this question (default: 1) |
-
----
-
-## YouTube Embed Notes
-
-Supports all YouTube URL formats:
-- `https://youtube.com/watch?v=VIDEO_ID`
-- `https://youtu.be/VIDEO_ID`
-- `https://youtube.com/live/VIDEO_ID`
-- `https://youtube.com/shorts/VIDEO_ID`
-
-Shows a clickable thumbnail first (works everywhere including Codespaces). On click, loads the iframe player with autoplay. YouTube Error 153 in Codespaces is a domain restriction by YouTube — it does not affect production deployments.
-
----
-
-## VPS PostgreSQL Setup (if not using Neon)
+Generate Prisma Client:
 
 ```bash
-sudo apt install postgresql -y
-sudo -u postgres psql
-CREATE USER quizadmin WITH PASSWORD 'yourpassword';
-CREATE DATABASE quiz_db OWNER quizadmin;
-\q
+pnpm db:generate
+```
 
-sudo nano /etc/postgresql/*/main/postgresql.conf
-# Set: listen_addresses = '*'
+Push schema:
 
-sudo nano /etc/postgresql/*/main/pg_hba.conf
-# Add: host all all 0.0.0.0/0 md5
+```bash
+pnpm db:push
+```
 
-sudo systemctl restart postgresql
-sudo ufw allow 5432
+Run development server:
+
+```bash
+pnpm dev
 ```
 
 ---
 
-## PM2 Deploy on VPS
+# VPS Deployment
 
 ```bash
+cd /var/www/lostmonktales/quiz-admin/quiz-admin
+
+git pull
+
+pnpm install
+
 pnpm build
+
+pm2 restart quiz-admin
+```
+
+---
+
+# PM2
+
+Start application:
+
+```bash
 pm2 start "pnpm start" --name quiz-admin
+```
+
+Save configuration:
+
+```bash
 pm2 save
 ```
+
+---
+
+# Production Notes
+
+## Dynamic Rendering
+
+Pages that directly query Prisma must use:
+
+```ts
+export const dynamic = 'force-dynamic'
+```
+
+Examples:
+
+```ts
+/admin/portraits/page.tsx
+/art-portraits/page.tsx
+/admin/art/page.tsx
+```
+
+Without this, Next.js may statically cache pages and new database records will not appear after deployment.
+
+---
+
+# Known Issues & Fixes
+
+## 1. Prisma Export Naming
+
+Correct:
+
+```ts
+import { prisma } from '@/lib/db'
+```
+
+Incorrect:
+
+```ts
+import { db } from '@/lib/db'
+```
+
+---
+
+## 2. Empty Component Files
+
+Always verify file contents before committing.
+
+A 0-byte file can compile incorrectly and create confusing production issues.
+
+---
+
+## 3. Static Build Cache
+
+Fixed using:
+
+```ts
+export const dynamic = 'force-dynamic'
+```
+
+---
+
+## 4. PM2 Port Confusion
+
+If package.json contains:
+
+```json
+"start": "next start -p 3030"
+```
+
+then:
+
+```bash
+PORT=4000 pm2 start "pnpm start"
+```
+
+will still run on:
+
+```text
+3030
+```
+
+because the port is hardcoded.
+
+---
+
+# Architecture Summary
+
+```text
+Quiz Admin Panel
+│
+├── Quiz Management
+├── Blog Management
+├── Art Store
+├── Art & Portraits
+│
+├── Prisma
+├── PostgreSQL (Neon)
+├── VPS File Server
+├── Next.js 14
+└── PM2 Deployment
+```
+
+This repository serves as a centralized content and media management platform for educational content, blogging, artwork sales, and portrait gallery publishing.
