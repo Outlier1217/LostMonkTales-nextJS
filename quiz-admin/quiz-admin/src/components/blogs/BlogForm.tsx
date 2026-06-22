@@ -1,11 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/Input'
-import { Textarea } from '@/components/ui/Textarea'
 import { Button } from '@/components/ui/Button'
 import { YoutubeEmbed } from '@/components/blogs/YoutubeEmbed'
-import { Youtube, Eye, EyeOff } from 'lucide-react'
+import { Youtube, Eye, EyeOff, ImageIcon } from 'lucide-react'
 
 interface BlogFormProps {
   initialData?: {
@@ -23,16 +22,12 @@ function extractYoutubeId(url: string): string | null {
   if (!url) return null
   try {
     const u = new URL(url)
-    // youtu.be/VIDEO_ID
     if (u.hostname === 'youtu.be') {
       return u.pathname.slice(1).split('?')[0] || null
     }
-    // youtube.com/watch?v=VIDEO_ID
     if (u.hostname.includes('youtube.com')) {
-      // /live/VIDEO_ID or /embed/VIDEO_ID
       const pathMatch = u.pathname.match(/\/(live|embed|shorts)\/([a-zA-Z0-9_-]{11})/)
       if (pathMatch) return pathMatch[2]
-      // ?v=VIDEO_ID
       return u.searchParams.get('v')
     }
   } catch {
@@ -41,21 +36,126 @@ function extractYoutubeId(url: string): string | null {
   return null
 }
 
+// Render markdown images in preview
+function renderContent(text: string) {
+  const parts = text.split(/(!\[.*?\]\(.*?\))/g)
+  return parts.map((part, i) => {
+    const imgMatch = part.match(/!\[(.*?)\]\((.*?)\)/)
+    if (imgMatch) {
+      return (
+        <img
+          key={i}
+          src={imgMatch[2]}
+          alt={imgMatch[1]}
+          className="max-w-full rounded-lg my-3 border border-gray-700"
+        />
+      )
+    }
+    return (
+      <span key={i} className="whitespace-pre-wrap">
+        {part}
+      </span>
+    )
+  })
+}
+
 export function BlogForm({ initialData }: BlogFormProps) {
   const router = useRouter()
   const isEdit = !!initialData
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [category, setCategory] = useState(initialData?.category ?? '')
   const [topic, setTopic] = useState(initialData?.topic ?? '')
   const [content, setContent] = useState(initialData?.content ?? '')
   const [youtubeUrl, setYoutubeUrl] = useState(initialData?.youtubeUrl ?? '')
-  const [isPublished, setIsPublished] = useState(initialData?.isPublished ?? false)
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [preview, setPreview] = useState(false)
 
   const youtubeId = youtubeUrl ? extractYoutubeId(youtubeUrl) : null
+
+  // Insert text at cursor position
+  function insertAtCursor(text: string) {
+    const textarea = textareaRef.current
+    if (!textarea) {
+      setContent(prev => prev + text)
+      return
+    }
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    setContent(prev => prev.slice(0, start) + text + prev.slice(end))
+    setTimeout(() => {
+      textarea.selectionStart = start + text.length
+      textarea.selectionEnd = start + text.length
+      textarea.focus()
+    }, 0)
+  }
+
+  // Upload image file to VPS
+  async function uploadImage(file: File): Promise<string | null> {
+    const ext = file.type.split('/')[1] || 'png'
+    const renamed = new File([file], `blog-${Date.now()}.${ext}`, { type: file.type })
+    const formData = new FormData()
+    formData.append('files', renamed)
+
+    const res = await fetch('/api/upload', { method: 'POST', body: formData })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.urls?.[0] ?? null
+  }
+
+  // Handle paste — intercept images
+  const handlePaste = useCallback(async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = Array.from(e.clipboardData.items)
+    const imageItems = items.filter(item => item.type.startsWith('image/'))
+    if (imageItems.length === 0) return // normal text paste, don't block
+
+    e.preventDefault()
+    setUploading(true)
+    setError('')
+
+    try {
+      for (const item of imageItems) {
+        const file = item.getAsFile()
+        if (!file) continue
+        const url = await uploadImage(file)
+        if (!url) {
+          setError('Image upload failed. Check VPS connection.')
+          continue
+        }
+        insertAtCursor(`![image](${url})\n`)
+      }
+    } catch {
+      setError('Image paste failed. Try again.')
+    } finally {
+      setUploading(false)
+    }
+  }, [])
+
+  // Handle file input (click to upload image)
+  async function handleFileInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    if (!files.length) return
+    setUploading(true)
+    setError('')
+    try {
+      for (const file of files) {
+        const url = await uploadImage(file)
+        if (!url) {
+          setError('Image upload failed.')
+          continue
+        }
+        insertAtCursor(`![image](${url})\n`)
+      }
+    } catch {
+      setError('Image upload failed.')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
 
   async function handleSubmit(publish: boolean) {
     if (!title.trim() || !category.trim() || !topic.trim() || !content.trim()) {
@@ -64,10 +164,12 @@ export function BlogForm({ initialData }: BlogFormProps) {
     }
     setError('')
     setLoading(true)
-
     try {
-      const payload = { title, category, topic, content, youtubeUrl: youtubeUrl || null, isPublished: publish }
-
+      const payload = {
+        title, category, topic, content,
+        youtubeUrl: youtubeUrl || null,
+        isPublished: publish,
+      }
       const res = await fetch(
         isEdit ? `/api/blogs/${initialData!.id}` : '/api/blogs',
         {
@@ -76,11 +178,10 @@ export function BlogForm({ initialData }: BlogFormProps) {
           body: JSON.stringify(payload),
         }
       )
-
-      if (!res.ok) throw new Error('Failed to save blog')
+      if (!res.ok) throw new Error()
       router.push('/admin/blogs')
       router.refresh()
-    } catch (e) {
+    } catch {
       setError('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
@@ -89,6 +190,8 @@ export function BlogForm({ initialData }: BlogFormProps) {
 
   return (
     <div className="p-8 max-w-4xl mx-auto space-y-6">
+
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-100">{isEdit ? 'Edit Blog' : 'New Blog'}</h1>
@@ -122,7 +225,6 @@ export function BlogForm({ initialData }: BlogFormProps) {
           placeholder="Blog title"
           value={title}
           onChange={e => setTitle(e.target.value)}
-          className="sm:col-span-1"
         />
       </div>
 
@@ -138,58 +240,87 @@ export function BlogForm({ initialData }: BlogFormProps) {
             className="pl-9"
           />
         </div>
-        {youtubeId && (
-          <YoutubeEmbed videoId={youtubeId} />
-        )}
+        {youtubeId && <YoutubeEmbed videoId={youtubeId} />}
       </div>
 
       {/* Content */}
       {preview ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 min-h-[300px]">
           <p className="text-xs text-gray-500 mb-4 uppercase tracking-wider">Preview</p>
-          <div className="prose prose-invert prose-sm max-w-none">
-            <pre className="whitespace-pre-wrap text-gray-300 text-sm font-sans leading-relaxed">{content || <span className="text-gray-600">Nothing to preview yet…</span>}</pre>
+          <div className="text-gray-300 text-sm leading-relaxed">
+            {content
+              ? renderContent(content)
+              : <span className="text-gray-600">Nothing to preview yet…</span>
+            }
           </div>
         </div>
       ) : (
-        <Textarea
-          label="Content (Markdown / Plain Text)"
-          placeholder="Write your blog content here. Paste from anywhere, write in markdown, or just type freely…"
-          value={content}
-          onChange={e => setContent(e.target.value)}
-          rows={18}
-          className="font-mono text-sm"
-        />
+        <div className="flex flex-col gap-1">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-gray-300">
+              Content (Markdown / Plain Text)
+            </label>
+            <div className="flex items-center gap-2">
+              {uploading && (
+                <span className="text-xs text-violet-400 animate-pulse flex items-center gap-1">
+                  <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Uploading…
+                </span>
+              )}
+              {/* Click to upload image button */}
+              <label className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-200 cursor-pointer transition-colors px-2 py-1 rounded-md hover:bg-gray-800">
+                <ImageIcon className="w-3.5 h-3.5" />
+                Add Image
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileInput}
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Textarea */}
+          <textarea
+            ref={textareaRef}
+            placeholder="Write your blog content here. Paste text or images directly…"
+            value={content}
+            onChange={e => setContent(e.target.value)}
+            onPaste={handlePaste}
+            rows={18}
+            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all resize-y font-mono"
+          />
+          <p className="text-xs text-gray-600">
+            Tip: Paste images directly (Ctrl+V) or click "Add Image" — they auto-upload to VPS and insert as markdown.
+          </p>
+        </div>
       )}
 
       {error && (
-        <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2">{error}</p>
+        <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2">
+          {error}
+        </p>
       )}
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">
-        <Button
-          variant="secondary"
-          onClick={() => handleSubmit(false)}
-          loading={loading}
-          disabled={loading}
-        >
+        <Button variant="secondary" onClick={() => handleSubmit(false)} loading={loading} disabled={loading || uploading}>
           {isEdit && !initialData?.isPublished ? 'Save Draft' : 'Save as Draft'}
         </Button>
-        <Button
-          onClick={() => handleSubmit(true)}
-          loading={loading}
-          disabled={loading}
-        >
+        <Button onClick={() => handleSubmit(true)} loading={loading} disabled={loading || uploading}>
           {isEdit ? 'Update & Publish' : 'Publish'}
         </Button>
-        <button
-          onClick={() => router.back()}
-          className="ml-auto text-sm text-gray-500 hover:text-gray-300 transition-colors"
-        >
+        <button onClick={() => router.back()} className="ml-auto text-sm text-gray-500 hover:text-gray-300 transition-colors">
           Cancel
         </button>
       </div>
+
     </div>
   )
 }
