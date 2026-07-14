@@ -16,3 +16,36 @@
   ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
 }
+
+/* Studio LM design tokens */
+:root {
+  --lm-orange: #F2801C;
+  --lm-orange-dark: #D96A12;
+  --lm-orange-tint: #FDECDA;
+  --lm-ink: #141414;
+  --lm-paper: #FFFFFF;
+  --lm-stone: #6E6A63;
+  --lm-line: rgba(20, 20, 20, 0.1);
+}
+
+.lm-page {
+  background: var(--lm-paper);
+  color: var(--lm-ink);
+  font-family: var(--font-inter), sans-serif;
+}
+
+.lm-display {
+  font-family: var(--font-fraunces), serif;
+  letter-spacing: -0.01em;
+}
+
+.lm-mono {
+  font-family: var(--font-plex-mono), monospace;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.lm-divider {
+  border-top: 1px solid var(--lm-line);
+}
