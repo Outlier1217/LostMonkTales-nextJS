@@ -63,6 +63,18 @@ model Blog {
   @@map("blogs")
 }
 
+model User {
+  id           String   @id @default(cuid())
+  email        String?  @unique
+  phone        String?  @unique
+  passwordHash String
+  image        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
 model ArtCategory {
   id          String    @id @default(cuid())
   name        String    @unique

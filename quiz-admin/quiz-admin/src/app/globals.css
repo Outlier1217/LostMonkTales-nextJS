@@ -4,44 +4,58 @@
 
 @layer base {
   * { box-sizing: border-box; }
-  html { color-scheme: dark; }
+  html { scroll-behavior: smooth; }
   body {
-    background-color: #030712;
-    color: #f9fafb;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    margin: 0;
+    background: #f3efe9;
+    color: #171310;
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+  a { text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  ::selection { background: rgba(242, 128, 28, 0.25); }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #efe7df; }
+  ::-webkit-scrollbar-thumb { background: #d58a35; border-radius: 999px; }
 }
 
-/* Studio LM design tokens */
 :root {
-  --lm-orange: #F2801C;
-  --lm-orange-dark: #D96A12;
-  --lm-orange-tint: #FDECDA;
-  --lm-ink: #141414;
-  --lm-paper: #FFFFFF;
-  --lm-stone: #6E6A63;
-  --lm-line: rgba(20, 20, 20, 0.1);
+  --lm-orange: #f2801c;
+  --lm-orange-deep: #ca6706;
+  --lm-orange-soft: #f9e9d2;
+  --lm-coffee: #171310;
+  --lm-coffee-soft: #2a241f;
+  --lm-stone: #5f564f;
+  --lm-paper: #f7f2eb;
+  --lm-card: rgba(255, 255, 255, 0.72);
+  --lm-line: rgba(23, 19, 16, 0.12);
+  --lm-shadow: 0 24px 80px rgba(23, 19, 16, 0.08);
+}
+
+.site-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(242, 128, 28, 0.16), transparent 28%),
+    linear-gradient(180deg, #f7f2eb 0%, #f3eee8 100%);
+  color: var(--lm-coffee);
 }
 
 .lm-page {
-  background: var(--lm-paper);
-  color: var(--lm-ink);
-  font-family: var(--font-inter), sans-serif;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-bottom: 4rem;
 }
 
 .lm-display {
-  font-family: var(--font-fraunces), serif;
-  letter-spacing: -0.01em;
+  font-family: var(--font-fraunces), Georgia, serif;
+  letter-spacing: -0.03em;
 }
 
 .lm-mono {
   font-family: var(--font-plex-mono), monospace;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   font-size: 0.7rem;
 }
@@ -49,3 +63,25 @@
 .lm-divider {
   border-top: 1px solid var(--lm-line);
 }
+
+.public-card {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(23, 19, 16, 0.08);
+  box-shadow: var(--lm-shadow);
+  backdrop-filter: blur(10px);
+}
+
+.section-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .section-shell {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
