@@ -11,11 +11,19 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const { title, description, price, contact, images, categoryId } = body
+  const { title, description, price, contact, images, categoryId, isPublished } = body
   if (!title || !price || !contact || !categoryId || !images?.length)
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   const artwork = await prisma.artwork.create({
-    data: { title, description, price: parseFloat(price), contact, images, categoryId },
+    data: {
+      title,
+      description,
+      price: parseFloat(price),
+      contact,
+      images,
+      categoryId,
+      isPublished: isPublished ?? true,
+    },
   })
   return NextResponse.json(artwork, { status: 201 })
 }
