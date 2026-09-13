@@ -29,7 +29,7 @@ export default function PublishToggle({ id, published }: { id: string; published
           : 'text-gray-500 border-gray-200 hover:bg-gray-50'}`}
     >
       {published ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-      {loading ? '...' : published ? 'Published' : 'Unpublish'}
+      {loading ? '...' : published ? 'Unpublish' : 'Publish'}
     </button>
   )
 }

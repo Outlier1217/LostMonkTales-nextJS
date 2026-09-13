@@ -28,7 +28,7 @@ export default function ArtworkForm({ categories, initial = {} }: Props) {
     contact: initial.contact || '',
     categoryId: initial.categoryId || '',
     images: (initial.images as string[]) || [],
-    isPublished: initial.isPublished || false,
+    isPublished: initial.isPublished ?? true,
   })
 
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
