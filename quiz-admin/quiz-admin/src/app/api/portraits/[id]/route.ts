@@ -36,7 +36,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     // VPS se bhi cleanup, fail ho to bhi DB delete continue rahega
     try {
       const filename = portrait.image.split('/').pop()
-      await fetch(`${process.env.FILE_SERVER_URL || 'http://88.222.244.226:3021'}/uploads/${filename}`, {
+      const fileServerUrl = (process.env.FILE_SERVER_INTERNAL_URL || process.env.FILE_SERVER_URL || 'http://127.0.0.1:3021').replace(/\/$/, '')
+      await fetch(`${fileServerUrl}/uploads/${filename}`, {
         method: 'DELETE',
       })
     } catch {}
