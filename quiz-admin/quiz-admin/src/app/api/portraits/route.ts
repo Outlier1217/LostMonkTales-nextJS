@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     const portrait = await prisma.portrait.create({
-      data: { title, image, category, isPublished: !!isPublished },
+      data: { title, image, category, isPublished: isPublished ?? true },
     })
 
     return NextResponse.json(portrait, { status: 201 })

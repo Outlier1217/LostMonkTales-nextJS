@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         title: item.title.trim(),
         image: item.image,
         category: item.category,
-        isPublished: !!item.isPublished,
+        isPublished: item.isPublished ?? true,
       })),
     })
 

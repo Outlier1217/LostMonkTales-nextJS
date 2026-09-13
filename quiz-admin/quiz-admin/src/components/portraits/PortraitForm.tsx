@@ -24,7 +24,7 @@ export default function PortraitForm({ initialData }: PortraitFormProps) {
   const [category, setCategory] = useState<PortraitCategoryValue>(
     initialData?.category ?? PORTRAIT_CATEGORIES[0].value
   )
-  const [isPublished, setIsPublished] = useState(initialData?.isPublished ?? false)
+  const [isPublished, setIsPublished] = useState(initialData?.isPublished ?? true)
   const [saving, setSaving] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {

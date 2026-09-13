@@ -18,7 +18,7 @@ export default function BulkPortraitUploadForm() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [category, setCategory] = useState<PortraitCategoryValue>(PORTRAIT_CATEGORIES[0].value)
-  const [publishImmediately, setPublishImmediately] = useState(false)
+  const [publishImmediately, setPublishImmediately] = useState(true)
   const [items, setItems] = useState<BulkItem[]>([])
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
