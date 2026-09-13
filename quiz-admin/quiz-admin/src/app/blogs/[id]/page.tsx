@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
+import { isHtmlContent, sanitizeBlogHtml } from '@/lib/blog-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +33,7 @@ export default async function BlogDetailPage({ params }: { params: { id: string 
 
   if (!blog || !blog.isPublished) notFound()
 
-  const paragraphs = renderContent(blog.content)
+  const richContent = isHtmlContent(blog.content) ? sanitizeBlogHtml(blog.content) : null
 
   return (
     <main className="lm-page">
@@ -66,13 +67,13 @@ export default async function BlogDetailPage({ params }: { params: { id: string 
             </div>
           )}
 
-          <div className="mt-8 space-y-6 text-lg leading-8 text-[#3b342f]">
-            {paragraphs.length > 0 ? (
-              paragraphs.map(paragraph => (
+          <div className="mt-8 text-lg leading-8 text-[#3b342f] [&_a]:text-[#ca6706] [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-[#f2801c] [&_blockquote]:pl-4 [&_h1]:mb-4 [&_h1]:font-semibold [&_h2]:mb-3 [&_h2]:font-semibold [&_h3]:mb-2 [&_h3]:font-semibold [&_img]:my-6 [&_img]:h-auto [&_img]:max-w-full [&_li]:ml-6 [&_ol]:list-decimal [&_p]:mb-6 [&_table]:my-6 [&_table]:w-full [&_td]:border [&_td]:border-[#eadbc0] [&_td]:p-2 [&_th]:border [&_th]:border-[#eadbc0] [&_th]:bg-[#f7f2eb] [&_th]:p-2 [&_ul]:list-disc" >
+            {richContent ? (
+              <div dangerouslySetInnerHTML={{ __html: richContent }} />
+            ) : (
+              renderContent(blog.content).map(paragraph => (
                 <p key={paragraph.id}>{paragraph.text}</p>
               ))
-            ) : (
-              <p>{blog.content.replace(/[#*_>-]/g, '').trim()}</p>
             )}
           </div>
         </div>

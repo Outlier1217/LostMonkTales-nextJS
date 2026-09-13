@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -62,7 +62,7 @@ function renderContent(text: string) {
 export function BlogForm({ initialData }: BlogFormProps) {
   const router = useRouter()
   const isEdit = !!initialData
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const editorRef = useRef<HTMLDivElement>(null)
 
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [category, setCategory] = useState(initialData?.category ?? '')
@@ -76,21 +76,28 @@ export function BlogForm({ initialData }: BlogFormProps) {
 
   const youtubeId = youtubeUrl ? extractYoutubeId(youtubeUrl) : null
 
-  // Insert text at cursor position
-  function insertAtCursor(text: string) {
-    const textarea = textareaRef.current
-    if (!textarea) {
-      setContent(prev => prev + text)
-      return
+  useEffect(() => {
+    if (editorRef.current && initialData?.content) {
+      editorRef.current.innerHTML = initialData.content
     }
-    const start = textarea.selectionStart
-    const end = textarea.selectionEnd
-    setContent(prev => prev.slice(0, start) + text + prev.slice(end))
-    setTimeout(() => {
-      textarea.selectionStart = start + text.length
-      textarea.selectionEnd = start + text.length
-      textarea.focus()
-    }, 0)
+  }, [initialData?.content])
+
+  function insertAtCursor(html: string) {
+    const editor = editorRef.current
+    if (!editor) return
+    editor.focus()
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0) {
+      editor.insertAdjacentHTML('beforeend', html)
+    } else {
+      const range = selection.getRangeAt(0)
+      range.deleteContents()
+      range.insertNode(range.createContextualFragment(html))
+      range.collapse(false)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+    setContent(editor.innerHTML)
   }
 
   // Upload image file to VPS
@@ -107,10 +114,10 @@ export function BlogForm({ initialData }: BlogFormProps) {
   }
 
   // Handle paste — intercept images
-  const handlePaste = useCallback(async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+  const handlePaste = useCallback(async (e: React.ClipboardEvent<HTMLDivElement>) => {
     const items = Array.from(e.clipboardData.items)
     const imageItems = items.filter(item => item.type.startsWith('image/'))
-    if (imageItems.length === 0) return // normal text paste, don't block
+    if (imageItems.length === 0 || e.clipboardData.types.includes('text/html')) return
 
     e.preventDefault()
     setUploading(true)
@@ -158,7 +165,8 @@ export function BlogForm({ initialData }: BlogFormProps) {
   }
 
   async function handleSubmit(publish: boolean) {
-    if (!title.trim() || !category.trim() || !topic.trim() || !content.trim()) {
+    const contentText = content.replace(/<[^>]*>/g, '').trim()
+    if (!title.trim() || !category.trim() || !topic.trim() || !contentText) {
       setError('Title, Category, Topic and Content are required.')
       return
     }
@@ -246,20 +254,15 @@ export function BlogForm({ initialData }: BlogFormProps) {
       {/* Content */}
       {preview ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 min-h-[300px]">
-          <p className="text-xs text-gray-500 mb-4 uppercase tracking-wider">Preview</p>
-          <div className="text-gray-300 text-sm leading-relaxed">
-            {content
-              ? renderContent(content)
-              : <span className="text-gray-600">Nothing to preview yet…</span>
-            }
-          </div>
+              <p className="text-xs text-gray-500 mb-4 uppercase tracking-wider">Preview</p>
+          <div className="text-gray-300 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: content || '<span class="text-gray-600">Nothing to preview yet…</span>' }} />
         </div>
       ) : (
         <div className="flex flex-col gap-1">
           {/* Toolbar */}
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-gray-300">
-              Content (Markdown / Plain Text)
+              Content (Rich Text)
             </label>
             <div className="flex items-center gap-2">
               {uploading && (
@@ -286,18 +289,16 @@ export function BlogForm({ initialData }: BlogFormProps) {
             </div>
           </div>
 
-          {/* Textarea */}
-          <textarea
-            ref={textareaRef}
-            placeholder="Write your blog content here. Paste text or images directly…"
-            value={content}
-            onChange={e => setContent(e.target.value)}
+          <div
+            ref={editorRef}
+            contentEditable
+            suppressContentEditableWarning
+            onInput={e => setContent(e.currentTarget.innerHTML)}
             onPaste={handlePaste}
-            rows={18}
-            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all resize-y font-mono"
+            className="min-h-[400px] w-full resize-y overflow-y-auto rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
           />
           <p className="text-xs text-gray-600">
-            Tip: Paste images directly (Ctrl+V) or click "Add Image" — they auto-upload to VPS and insert as markdown.
+            Tip: Paste formatted text directly to keep its colors, styles, and layout. Images paste or upload into the post.
           </p>
         </div>
       )}

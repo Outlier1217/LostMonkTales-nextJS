@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, BookOpenText, Sparkles } from 'lucide-react'
 
 export default function Hero() {
@@ -40,11 +41,14 @@ export default function Hero() {
 
           <div className="relative flex justify-center md:justify-end">
             <div className="relative h-[280px] w-[280px] md:h-[360px] md:w-[360px]">
-              <div className="absolute inset-0 rounded-full bg-[#f2801c] shadow-[0_25px_80px_rgba(242,128,28,0.32)]" />
-              <div className="absolute inset-[18%] rounded-full border-[10px] border-[#171310] bg-[#171310]" />
-              <div className="absolute inset-[28%] rounded-full border-[10px] border-[#f7f2eb] bg-[#171310]" />
-              <div className="absolute bottom-[22%] left-[18%] h-[25%] w-[28%] rounded-full border-[10px] border-[#171310] bg-[#171310]" />
-              <div className="absolute right-[15%] top-[20%] h-5 w-5 rounded-full bg-[#f7f2eb] shadow-[0_0_0_8px_rgba(23,19,16,0.9)]" />
+              <Image
+                src="/fav-icon.png"
+                alt="Lost Monk Tales emblem"
+                width={360}
+                height={360}
+                priority
+                className="h-full w-full object-contain drop-shadow-[0_25px_40px_rgba(242,128,28,0.28)]"
+              />
             </div>
           </div>
         </div>

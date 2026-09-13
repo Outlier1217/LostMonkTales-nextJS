@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Menu, X, UserCircle2 } from 'lucide-react'
 
 const navItems = [
@@ -190,9 +191,9 @@ export function SiteHeader() {
         </div>
       )}
 
-      {authOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#171310]/35 p-4 backdrop-blur-[1px]">
-          <div className="w-full max-w-[440px] rounded-[1.5rem] border border-[#e3d5ba] bg-[#f4efe8] p-5 shadow-[0_24px_70px_rgba(23,19,16,0.18)]">
+      {authOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-[#171310]/35 p-4 backdrop-blur-[1px]">
+          <div className="my-4 w-full max-w-[440px] rounded-[1.5rem] border border-[#e3d5ba] bg-[#f4efe8] p-5 shadow-[0_24px_70px_rgba(23,19,16,0.18)] sm:my-8">
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <p className="lm-mono text-[0.62rem] text-[#ca6706]">{authMode === 'signin' ? 'Welcome back' : 'Create account'}</p>
@@ -251,7 +252,8 @@ export function SiteHeader() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </header>
   )
