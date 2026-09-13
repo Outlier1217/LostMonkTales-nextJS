@@ -20,9 +20,10 @@ export default function ImageUploader({ value, onChange }: Props) {
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: form })
       const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || 'Upload failed')
       if (data.urls) onChange([...value, ...data.urls])
-    } catch {
-      alert('Upload failed')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Upload failed')
     } finally {
       setUploading(false)
     }

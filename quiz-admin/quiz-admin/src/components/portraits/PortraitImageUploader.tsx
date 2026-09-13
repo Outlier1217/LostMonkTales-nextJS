@@ -21,13 +21,16 @@ async function uploadFile(file: File) {
     formData.append('files', file)   // 'file' nahi, 'files' — existing route ka contract
 
     const res = await fetch('/api/upload', { method: 'POST', body: formData })
-    if (!res.ok) throw new Error('Upload failed')
+    if (!res.ok) {
+      const data = await res.json().catch(() => null)
+      throw new Error(data?.error || 'Upload failed')
+    }
 
     const data = await res.json()
     onChange(data.urls[0])   // 'url' nahi, 'urls' array ka pehla item
   } catch (err) {
     console.error(err)
-    alert('Image upload failed. VPS file server check karo.')
+    alert(err instanceof Error ? err.message : 'Image upload failed. VPS file server check karo.')
   } finally {
     setUploading(false)
   }

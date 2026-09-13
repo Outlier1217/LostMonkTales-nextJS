@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 
-const FILE_SERVER_INTERNAL_URL = (process.env.FILE_SERVER_INTERNAL_URL || process.env.FILE_SERVER_URL || 'http://127.0.0.1:3021').replace(/\/$/, '')
+const configuredInternalUrl = process.env.FILE_SERVER_INTERNAL_URL || process.env.FILE_SERVER_URL || 'http://127.0.0.1:3021'
+const FILE_SERVER_INTERNAL_URL = configuredInternalUrl
+  .replace('://localhost:', '://127.0.0.1:')
+  .replace(/\/$/, '')
 const FILE_SERVER_PUBLIC_URL = (process.env.FILE_SERVER_PUBLIC_URL || 'http://88.222.244.226:3021').replace(/\/$/, '')
 
 export async function POST(req: Request) {
