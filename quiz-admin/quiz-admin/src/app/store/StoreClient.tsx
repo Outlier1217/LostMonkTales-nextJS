@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import ArtCard from './ArtCard'
 
 interface Category { id: string; name: string }
@@ -22,24 +23,26 @@ export default function StoreClient({
     : artworks.filter(a => a.category.id === active)
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
+    <main className="lm-page">
       {/* Header */}
-      <div className="border-b border-gray-800 px-6 py-5">
-        <h1 className="text-2xl font-bold">Art Store</h1>
-        <p className="text-gray-400 text-sm mt-1">
-          Original artworks — handpicked collection
-        </p>
-      </div>
+      <div className="section-shell py-16 md:py-20">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
+          <div>
+            <p className="lm-mono mb-3 text-[0.68rem] text-[#ca6706]">The collection</p>
+            <h1 className="lm-display text-4xl text-[#171310] md:text-6xl">Art Store</h1>
+            <p className="mt-4 max-w-xl text-base leading-7 text-[#5f564f]">Original artworks selected with care. Open a piece to explore every image and share it with someone.</p>
+          </div>
+          <Link href="/art-portraits" className="text-sm font-medium text-[#171310] underline-offset-4 hover:text-[#ca6706] hover:underline">Browse portraits →</Link>
+        </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Category Filter */}
-        <div className="flex gap-2 flex-wrap mb-8">
+        <div className="mb-8 flex flex-wrap gap-2">
           <button
             onClick={() => setActive('all')}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors
               ${active === 'all'
-                ? 'bg-violet-600 text-white'
-                : 'border border-gray-700 text-gray-400 hover:border-gray-500'}`}
+                ? 'bg-[#171310] text-[#f7f2eb]'
+                : 'border border-[#c7b7a5] text-[#5f564f] hover:border-[#f2801c]'}`}
           >
             All ({artworks.length})
           </button>
@@ -50,10 +53,10 @@ export default function StoreClient({
               <button
                 key={cat.id}
                 onClick={() => setActive(cat.id)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors
                   ${active === cat.id
-                    ? 'bg-violet-600 text-white'
-                    : 'border border-gray-700 text-gray-400 hover:border-gray-500'}`}
+                    ? 'bg-[#171310] text-[#f7f2eb]'
+                    : 'border border-[#c7b7a5] text-[#5f564f] hover:border-[#f2801c]'}`}
               >
                 {cat.name} ({count})
               </button>
@@ -63,17 +66,17 @@ export default function StoreClient({
 
         {/* Grid */}
         {filtered.length === 0 ? (
-          <div className="text-center py-20 text-gray-600">
+          <div className="rounded-[2rem] border border-[#eadbc0] bg-white/60 py-20 text-center text-[#5f564f]">
             <p>No artworks in this category yet</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map(art => (
               <ArtCard key={art.id} art={art} />
             ))}
           </div>
         )}
       </div>
-    </div>
+    </main>
   )
 }

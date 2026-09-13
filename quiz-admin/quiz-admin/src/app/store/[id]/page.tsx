@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
+import ShareArtworkButton from '../ShareArtworkButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +57,10 @@ export default async function StoreItemPage({ params }: { params: { id: string }
             <div className="mt-8 rounded-[1.4rem] border border-[#eddcc4] bg-[#f9e9d2] p-4">
               <p className="lm-mono mb-2 text-[0.62rem] text-[#ca6706]">Contact</p>
               <p className="break-all text-base text-[#171310]">{artwork.contact}</p>
+            </div>
+
+            <div className="mt-6">
+              <ShareArtworkButton title={artwork.title} />
             </div>
           </div>
         </div>
