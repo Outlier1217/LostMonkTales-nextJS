@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { PORTRAIT_CATEGORIES } from '@/lib/portrait-categories'
 
 type Portrait = { id: string; title: string; image: string; category: string }
@@ -42,12 +43,12 @@ export default function PortraitsClient({ portraits }: { portraits: Portrait[] }
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
           {filtered.map((p) => (
-            <div key={p.id} className="group">
+            <Link key={p.id} href={`/art-portraits/${p.id}`} className="group block">
               <div className="aspect-[3/4] rounded-lg overflow-hidden border border-gray-800 bg-gray-900">
                 <img src={p.image} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>
               <p className="text-sm text-gray-300 mt-2 truncate">{p.title}</p>
-            </div>
+            </Link>
           ))}
         </div>
       )}
