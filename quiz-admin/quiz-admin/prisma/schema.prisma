@@ -55,6 +55,7 @@ model Blog {
   category    String
   topic       String
   content     String   // markdown/rich text
+  thumbnailUrl String?
   youtubeUrl  String?
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())

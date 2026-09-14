@@ -13,6 +13,7 @@ interface BlogFormProps {
     category: string
     topic: string
     content: string
+    thumbnailUrl: string | null
     youtubeUrl: string | null
     isPublished: boolean
   }
@@ -68,6 +69,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
   const [category, setCategory] = useState(initialData?.category ?? '')
   const [topic, setTopic] = useState(initialData?.topic ?? '')
   const [content, setContent] = useState(initialData?.content ?? '')
+  const [thumbnailUrl, setThumbnailUrl] = useState(initialData?.thumbnailUrl ?? '')
   const [youtubeUrl, setYoutubeUrl] = useState(initialData?.youtubeUrl ?? '')
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -113,17 +115,44 @@ export function BlogForm({ initialData }: BlogFormProps) {
     return data.urls?.[0] ?? null
   }
 
+  async function handleThumbnailInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setError('')
+    try {
+      const url = await uploadImage(file)
+      if (!url) setError('Thumbnail upload failed.')
+      else setThumbnailUrl(url)
+    } catch {
+      setError('Thumbnail upload failed.')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
   // Handle paste — intercept images
   const handlePaste = useCallback(async (e: React.ClipboardEvent<HTMLDivElement>) => {
     const items = Array.from(e.clipboardData.items)
     const imageItems = items.filter(item => item.type.startsWith('image/'))
-    if (imageItems.length === 0 || e.clipboardData.types.includes('text/html')) return
+    if (imageItems.length === 0) return
 
     e.preventDefault()
     setUploading(true)
     setError('')
 
     try {
+      const html = e.clipboardData.getData('text/html')
+      const text = e.clipboardData.getData('text/plain')
+      const container = document.createElement('div')
+      container.innerHTML = html || text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')
+      container.querySelectorAll('img').forEach((image, index) => {
+        image.removeAttribute('src')
+        image.setAttribute('data-pasted-image', String(index))
+      })
+      insertAtCursor(container.innerHTML)
+
       for (const item of imageItems) {
         const file = item.getAsFile()
         if (!file) continue
@@ -132,7 +161,15 @@ export function BlogForm({ initialData }: BlogFormProps) {
           setError('Image upload failed. Check VPS connection.')
           continue
         }
-        insertAtCursor(`![image](${url})\n`)
+        const imageIndex = imageItems.indexOf(item)
+        const pastedImage = editorRef.current?.querySelector(`[data-pasted-image="${imageIndex}"]`)
+        if (pastedImage instanceof HTMLImageElement) {
+          pastedImage.src = url
+          pastedImage.removeAttribute('data-pasted-image')
+        } else {
+          insertAtCursor(`<img src="${url}" alt="Pasted image" />`)
+        }
+        setContent(editorRef.current?.innerHTML ?? '')
       }
     } catch {
       setError('Image paste failed. Try again.')
@@ -154,7 +191,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
           setError('Image upload failed.')
           continue
         }
-        insertAtCursor(`![image](${url})\n`)
+        insertAtCursor(`<img src="${url}" alt="Uploaded image" />`)
       }
     } catch {
       setError('Image upload failed.')
@@ -174,7 +211,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
     setLoading(true)
     try {
       const payload = {
-        title, category, topic, content,
+        title, category, topic, content, thumbnailUrl: thumbnailUrl || null,
         youtubeUrl: youtubeUrl || null,
         isPublished: publish,
       }
@@ -234,6 +271,20 @@ export function BlogForm({ initialData }: BlogFormProps) {
           value={title}
           onChange={e => setTitle(e.target.value)}
         />
+      </div>
+
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-gray-300">Blog Thumbnail (optional)</label>
+        <div className="flex items-start gap-4">
+          {thumbnailUrl && (
+            <img src={thumbnailUrl} alt="Blog thumbnail preview" className="h-24 w-40 rounded-lg border border-gray-700 object-cover" />
+          )}
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-300 hover:border-gray-500">
+            <ImageIcon className="h-4 w-4" />
+            {thumbnailUrl ? 'Replace thumbnail' : 'Add thumbnail'}
+            <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailInput} />
+          </label>
+        </div>
       </div>
 
       {/* YouTube URL */}

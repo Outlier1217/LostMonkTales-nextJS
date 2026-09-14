@@ -53,6 +53,10 @@ export default async function BlogDetailPage({ params }: { params: { id: string 
 
           <h1 className="lm-display text-4xl leading-tight text-[#171310] md:text-6xl">{blog.title}</h1>
 
+          {blog.thumbnailUrl && (
+            <img src={blog.thumbnailUrl} alt={blog.title} className="mt-8 max-h-[32rem] w-full rounded-[1.5rem] object-cover" />
+          )}
+
           {blog.youtubeUrl && (
             <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-[#eadbc0] bg-[#171310] p-2">
               <div className="aspect-video w-full">

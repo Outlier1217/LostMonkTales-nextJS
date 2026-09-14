@@ -16,6 +16,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       category: body.category,
       topic: body.topic,
       content: body.content,
+      thumbnailUrl: body.thumbnailUrl || null,
       youtubeUrl: body.youtubeUrl || null,
       isPublished: body.isPublished,
       updatedAt: new Date(),

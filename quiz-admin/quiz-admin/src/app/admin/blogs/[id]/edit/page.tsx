@@ -16,6 +16,7 @@ export default async function EditBlogPage({ params }: { params: { id: string } 
         category: blog.category,
         topic: blog.topic,
         content: blog.content,
+        thumbnailUrl: blog.thumbnailUrl,
         youtubeUrl: blog.youtubeUrl,
         isPublished: blog.isPublished,
       }}
