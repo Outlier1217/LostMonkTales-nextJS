@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { isHtmlContent, sanitizeBlogHtml } from '@/lib/blog-content'
+import { YoutubeEmbed } from '@/components/blogs/YoutubeEmbed'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,6 +12,18 @@ function formatDate(value: Date | string) {
     month: 'short',
     year: 'numeric',
   })
+}
+
+function extractYoutubeId(url: string): string | null {
+  try {
+    const value = new URL(url)
+    if (value.hostname === 'youtu.be') return value.pathname.slice(1).split('/')[0] || null
+    if (!value.hostname.includes('youtube.com')) return null
+    const pathMatch = value.pathname.match(/\/(?:live|embed|shorts)\/([a-zA-Z0-9_-]{11})/)
+    return pathMatch?.[1] ?? value.searchParams.get('v')
+  } catch {
+    return null
+  }
 }
 
 function renderContent(content: string) {
@@ -57,17 +70,9 @@ export default async function BlogDetailPage({ params }: { params: { id: string 
             <img src={blog.thumbnailUrl} alt={blog.title} className="mt-8 max-h-[32rem] w-full rounded-[1.5rem] object-cover" />
           )}
 
-          {blog.youtubeUrl && (
-            <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-[#eadbc0] bg-[#171310] p-2">
-              <div className="aspect-video w-full">
-                <iframe
-                  className="h-full w-full rounded-[1rem]"
-                  src={blog.youtubeUrl.replace('watch?v=', 'embed/')}
-                  title={blog.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
+          {blog.youtubeUrl && extractYoutubeId(blog.youtubeUrl) && (
+            <div className="mt-8">
+              <YoutubeEmbed videoId={extractYoutubeId(blog.youtubeUrl)!} />
             </div>
           )}
 
