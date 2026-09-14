@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Plus, Pencil, FileQuestion } from 'lucide-react'
+import { DeleteQuizButton } from '@/components/quizzes/DeleteQuizButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,6 +79,7 @@ export default async function QuizzesPage() {
                           Questions
                         </Button>
                       </Link>
+                      <DeleteQuizButton id={quiz.id} />
                     </div>
                   </td>
                 </tr>
