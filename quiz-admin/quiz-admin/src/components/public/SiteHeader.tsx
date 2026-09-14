@@ -36,6 +36,8 @@ export function SiteHeader() {
     image: '',
     identifier: '',
   })
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -62,12 +64,25 @@ export function SiteHeader() {
 
     try {
       const route = authMode === 'signup' ? '/api/auth/signup' : '/api/auth/signin'
+      let imageUrl = ''
+
+      if (authMode === 'signup' && imageFile) {
+        const uploadData = new FormData()
+        uploadData.append('files', new File([imageFile], `profile-${Date.now()}.${imageFile.name.split('.').pop() || 'jpg'}`, { type: imageFile.type }))
+        const uploadResponse = await fetch('/api/upload', { method: 'POST', body: uploadData })
+        const uploadResult = await uploadResponse.json()
+        if (!uploadResponse.ok || !uploadResult.urls?.[0]) {
+          throw new Error('Profile image upload failed. Please try again.')
+        }
+        imageUrl = uploadResult.urls[0]
+      }
+
       const payload = authMode === 'signup'
         ? {
             email: formData.email,
             phone: formData.phone,
             password: formData.password,
-            image: formData.image,
+            image: imageUrl,
           }
         : {
             identifier: formData.identifier,
@@ -88,12 +103,30 @@ export function SiteHeader() {
       setAuthOpen(false)
       setMenuOpen(false)
       setFormData({ email: '', phone: '', password: '', image: '', identifier: '' })
+      setImageFile(null)
+      setImagePreview('')
       await fetchUser()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setError('Please choose an image file.')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Profile image must be 5 MB or smaller.')
+      return
+    }
+    setError('')
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
   }
 
   async function handleSignOut() {
@@ -220,7 +253,17 @@ export function SiteHeader() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#171310]">Profile image (optional)</label>
-                    <input value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} type="url" placeholder="https://example.com/profile.jpg" className="w-full rounded-xl border border-[#d7c3a1] bg-white px-3 py-2.5 text-[#171310] outline-none ring-0 placeholder:text-[#8b7d73] focus:border-[#f2801c]" />
+                    <div className="flex items-center gap-3">
+                      {imagePreview ? (
+                        <img src={imagePreview} alt="Profile preview" className="h-12 w-12 rounded-full object-cover ring-2 ring-[#f2801c]" />
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#171310] text-xs text-[#f7f2eb]">Photo</div>
+                      )}
+                      <label className="flex-1 cursor-pointer rounded-xl border border-[#d7c3a1] bg-white px-3 py-2.5 text-sm text-[#8b7d73] transition hover:border-[#f2801c]">
+                        {imageFile ? imageFile.name : 'Choose an image from your device'}
+                        <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                      </label>
+                    </div>
                   </div>
                 </>
               ) : (

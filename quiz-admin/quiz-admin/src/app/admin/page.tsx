@@ -2,15 +2,16 @@ import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
-import { Plus, BookOpen, CheckCircle, XCircle } from 'lucide-react'
+import { Plus, BookOpen, CheckCircle, MessageSquare } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboard() {
-  const [quizzes, totalQuestions, totalBlogs] = await Promise.all([
+  const [quizzes, totalQuestions, totalBlogs, messages] = await Promise.all([
     prisma.quiz.findMany({ include: { _count: { select: { questions: true } } }, orderBy: { createdAt: 'desc' }, take: 5 }),
     prisma.question.count(),
-    prisma.blog.count(),           // ← add this
+    prisma.blog.count(),
+    prisma.contactMessage.findMany({ orderBy: { createdAt: 'desc' } }),
   ])
 
   const stats = {
@@ -35,11 +36,12 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
           { label: 'Total Quizzes', value: stats.total, icon: BookOpen, color: 'text-violet-400' },
           { label: 'Published', value: stats.published, icon: CheckCircle, color: 'text-emerald-400' },
           { label: 'Total Questions', value: totalQuestions, icon: CheckCircle, color: 'text-blue-400' },
+          { label: 'Contact Messages', value: messages.length, icon: MessageSquare, color: 'text-orange-400' },
         ].map(s => (
           <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
@@ -49,6 +51,38 @@ export default async function AdminDashboard() {
             <p className="text-3xl font-bold text-gray-100">{s.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Contact Messages */}
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-gray-200">Messages from Users</h2>
+            <p className="mt-1 text-sm text-gray-500">All messages sent through Contact Us</p>
+          </div>
+          <Link href="/admin/messages" className="text-sm text-violet-400 hover:text-violet-300">Open inbox →</Link>
+        </div>
+        {messages.length === 0 ? (
+          <div className="rounded-2xl border border-gray-800 bg-gray-900 py-12 text-center text-sm text-gray-500">No contact messages yet.</div>
+        ) : (
+          <div className="space-y-3">
+            {messages.map(message => (
+              <article key={message.id} className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+                <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <p className="font-medium text-gray-200">{message.name}</p>
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
+                      <a href={`mailto:${message.email}`} className="hover:text-violet-300">{message.email}</a>
+                      {message.phone && <a href={`tel:${message.phone}`} className="hover:text-violet-300">{message.phone}</a>}
+                    </div>
+                  </div>
+                  <time className="text-xs text-gray-600">{new Date(message.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</time>
+                </div>
+                <p className="mt-3 whitespace-pre-wrap border-t border-gray-800 pt-3 text-sm leading-6 text-gray-400">{message.message}</p>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Recent Quizzes */}

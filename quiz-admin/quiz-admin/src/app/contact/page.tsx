@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react'
 import { Mail, MapPin, Phone, Send } from 'lucide-react'
 
 const mapUrl = 'https://www.google.com/maps?ll=28.351134,77.28527&z=16&t=m&hl=en&gl=IN&mapclient=embed&cid=10403786810668859038'
+const mapEmbedUrl = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3510.3654040908236!2d77.32048927527924!3d28.37802947580468!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cdb55072da2fd%3A0x91e20f6254c675c9!2sSTUDIO%20LM!5e0!3m2!1sen!2sin!4v1789386821487!5m2!1sen!2sin'
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
@@ -64,7 +65,7 @@ export default function ContactPage() {
         </div>
 
         <div className="mt-8 overflow-hidden rounded-[2rem] border border-[#eadbc0] bg-white/75">
-          <iframe title="Lost Monk Tales location" src={mapUrl} className="h-[360px] w-full border-0 md:h-[460px]" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+          <iframe title="Lost Monk Tales location" src={mapEmbedUrl} className="h-[360px] w-full border-0 md:h-[460px]" allowFullScreen loading="lazy" referrerPolicy="strict-origin-when-cross-origin" />
         </div>
       </section>
     </main>
