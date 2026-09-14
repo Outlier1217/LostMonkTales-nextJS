@@ -13,6 +13,7 @@ const navItems = [
   { href: '/store', label: 'Store' },
   { href: '/art-portraits', label: 'Portraits' },
   { href: '/architecture', label: 'Architecture' },
+  { href: '/contact', label: 'Contact' },
 ]
 
 type UserState = {

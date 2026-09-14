@@ -76,6 +76,19 @@ model User {
   @@map("users")
 }
 
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("contact_messages")
+}
+
 model ArtCategory {
   id          String    @id @default(cuid())
   name        String    @unique
