@@ -2,16 +2,17 @@ import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
-import { Plus, BookOpen, CheckCircle, MessageSquare } from 'lucide-react'
+import { Plus, BookOpen, CheckCircle, MessageSquare, Users } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboard() {
-  const [quizzes, totalQuestions, totalBlogs, messages] = await Promise.all([
+  const [quizzes, totalQuestions, totalBlogs, messages, totalUsers] = await Promise.all([
     prisma.quiz.findMany({ include: { _count: { select: { questions: true } } }, orderBy: { createdAt: 'desc' }, take: 5 }),
     prisma.question.count(),
     prisma.blog.count(),
     prisma.contactMessage.findMany({ orderBy: { createdAt: 'desc' } }),
+    prisma.user.count(),
   ])
 
   const stats = {
@@ -42,6 +43,7 @@ export default async function AdminDashboard() {
           { label: 'Published', value: stats.published, icon: CheckCircle, color: 'text-emerald-400' },
           { label: 'Total Questions', value: totalQuestions, icon: CheckCircle, color: 'text-blue-400' },
           { label: 'Contact Messages', value: messages.length, icon: MessageSquare, color: 'text-orange-400' },
+          { label: 'Registered Users', value: totalUsers, icon: Users, color: 'text-cyan-400' },
         ].map(s => (
           <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
@@ -51,6 +53,14 @@ export default async function AdminDashboard() {
             <p className="text-3xl font-bold text-gray-100">{s.value}</p>
           </div>
         ))}
+      </div>
+
+      <div className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-900 p-5">
+        <div>
+          <h2 className="text-base font-semibold text-gray-200">User activity</h2>
+          <p className="mt-1 text-sm text-gray-500">Review profiles, bookmarks, and completed quiz results.</p>
+        </div>
+        <Link href="/admin/users" className="text-sm text-violet-400 hover:text-violet-300">View users →</Link>
       </div>
 
       {/* Contact Messages */}

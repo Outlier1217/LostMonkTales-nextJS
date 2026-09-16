@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpen, LayoutDashboard, ListChecks, Palette, FileText, Building2, Image as ImageIcon, MessageSquare } from 'lucide-react'
+import { BookOpen, LayoutDashboard, ListChecks, Palette, FileText, Building2, Image as ImageIcon, MessageSquare, Users } from 'lucide-react'
 import LogoutButton from "@/components/ui/LogoutButton"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -65,6 +65,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-all">
           <MessageSquare className="w-4 h-4" />
           Messages
+        </Link>
+
+        <Link href="/admin/users"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm
+            text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-all">
+          <Users className="w-4 h-4" />
+          Users
         </Link>
         </nav>
 

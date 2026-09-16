@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { getBlogExcerpt } from '@/lib/blog-content'
 
 type Blog = {
   id: string
@@ -86,7 +87,7 @@ export default function BlogsSection({ blogs }: { blogs: Blog[] }) {
           </h3>
 
           <p className="mt-4 max-w-3xl text-base leading-7 text-[#5f564f] md:text-lg">
-            {featured.content.replace(/[#*_>-]/g, '').slice(0, 220)}...
+            {getBlogExcerpt(featured.content, 220)}
           </p>
         </Link>
       </div>
