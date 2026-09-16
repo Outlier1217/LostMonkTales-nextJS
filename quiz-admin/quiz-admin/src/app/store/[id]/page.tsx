@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import ShareArtworkButton from '../ShareArtworkButton'
+import { BookmarkButton } from '@/components/public/BookmarkButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,7 +49,10 @@ export default async function StoreItemPage({ params }: { params: { id: string }
               <span className="text-lg font-semibold text-[#171310]">₹{Number(artwork.price).toLocaleString()}</span>
             </div>
 
-            <h1 className="lm-display text-4xl leading-tight text-[#171310] md:text-5xl">{artwork.title}</h1>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <h1 className="lm-display text-4xl leading-tight text-[#171310] md:text-5xl">{artwork.title}</h1>
+              <BookmarkButton type="ARTWORK" id={artwork.id} />
+            </div>
 
             <p className="mt-5 text-base leading-7 text-[#5f564f]">
               {artwork.description || 'A handcrafted piece created with care and intention.'}

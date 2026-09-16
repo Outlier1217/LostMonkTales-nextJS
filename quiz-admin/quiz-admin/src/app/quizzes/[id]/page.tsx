@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { QuizPlayer } from './QuizPlayer'
+import { BookmarkButton } from '@/components/public/BookmarkButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,7 +30,10 @@ export default async function QuizDetailPage({ params }: { params: { id: string 
             <span>{quiz.difficulty}</span>
           </div>
 
-          <h1 className="lm-display text-4xl leading-tight text-[#171310] md:text-6xl">{quiz.title}</h1>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <h1 className="lm-display text-4xl leading-tight text-[#171310] md:text-6xl">{quiz.title}</h1>
+            <BookmarkButton type="QUIZ" id={quiz.id} />
+          </div>
 
           <p className="mt-5 max-w-3xl text-lg leading-8 text-[#3b342f]">
             {quiz.description || 'A thoughtful challenge crafted from stories, details, and observation.'}

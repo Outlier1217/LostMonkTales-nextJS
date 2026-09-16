@@ -27,3 +27,15 @@ export function sanitizeBlogHtml(content: string) {
 export function isHtmlContent(content: string) {
   return /<([a-z][^\s/>]*)\b[^>]*>/i.test(content)
 }
+
+export function getBlogExcerpt(content: string, length = 170) {
+  const plainText = sanitizeHtml(content, {
+    allowedTags: [],
+    allowedAttributes: {},
+  })
+    .replace(/[#*_>`~-]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  return `${plainText.slice(0, length).trimEnd()}${plainText.length > length ? '...' : ''}`
+}

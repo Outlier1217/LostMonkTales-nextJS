@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
+import { getBlogExcerpt } from '@/lib/blog-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,7 +45,7 @@ export default async function BlogsPage() {
                 <h2 className="lm-display text-2xl leading-tight text-[#171310] group-hover:text-[#ca6706]">{blog.title}</h2>
                 <p className="mt-3 text-sm uppercase tracking-[0.12em] text-[#5f564f]">{blog.topic}</p>
                 <p className="mt-4 text-base leading-7 text-[#5f564f]">
-                  {blog.content.replace(/[#*_>-]/g, '').slice(0, 170)}...
+                  {getBlogExcerpt(blog.content)}
                 </p>
               </Link>
             ))}

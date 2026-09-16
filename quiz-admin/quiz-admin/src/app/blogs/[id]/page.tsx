@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { isHtmlContent, sanitizeBlogHtml } from '@/lib/blog-content'
 import { YoutubeEmbed } from '@/components/blogs/YoutubeEmbed'
+import { BookmarkButton } from '@/components/public/BookmarkButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,7 +65,10 @@ export default async function BlogDetailPage({ params }: { params: { id: string 
             <span>{formatDate(blog.createdAt)}</span>
           </div>
 
-          <h1 className="lm-display text-4xl leading-tight text-[#171310] md:text-6xl">{blog.title}</h1>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <h1 className="lm-display text-4xl leading-tight text-[#171310] md:text-6xl">{blog.title}</h1>
+            <BookmarkButton type="BLOG" id={blog.id} />
+          </div>
 
           {blog.thumbnailUrl && (
             <img src={blog.thumbnailUrl} alt={blog.title} className="mt-8 max-h-[32rem] w-full rounded-[1.5rem] object-cover" />

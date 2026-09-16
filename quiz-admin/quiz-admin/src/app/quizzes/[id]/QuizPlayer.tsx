@@ -54,7 +54,7 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
     [quiz.questions],
   )
 
-  function finishQuiz() {
+  async function finishQuiz() {
     let score = 0
     let correct = 0
     let wrong = 0
@@ -73,7 +73,13 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
 
     const skipped = quiz.questions.length - correct - wrong
     const percentage = totalMarks > 0 ? Math.max(0, (score / totalMarks) * 100) : 0
-    setResult({ score: Math.max(0, score), totalMarks, percentage, correct, wrong, skipped })
+    const finalResult = { score: Math.max(0, score), totalMarks, percentage, correct, wrong, skipped }
+    setResult(finalResult)
+    await fetch('/api/quiz-attempts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quizId: quiz.id, ...finalResult }),
+    }).catch(() => undefined)
   }
 
   useEffect(() => {

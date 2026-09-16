@@ -154,13 +154,15 @@ export function SiteHeader() {
         <div className="hidden items-center gap-3 md:flex">
           {!loadingUser && user ? (
             <div className="flex items-center gap-3">
-              {user.image ? (
-                <img src={user.image} alt="Profile" className="h-10 w-10 rounded-full object-cover ring-2 ring-[#f2801c]" />
-              ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#171310] text-sm font-semibold text-[#f7f2eb]">
-                  {(user.email || user.phone || 'U').charAt(0).toUpperCase()}
-                </div>
-              )}
+              <Link href="/profile" aria-label="Open profile">
+                {user.image ? (
+                  <img src={user.image} alt="Profile" className="h-10 w-10 rounded-full object-cover ring-2 ring-[#f2801c]" />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#171310] text-sm font-semibold text-[#f7f2eb]">
+                    {(user.email || user.phone || 'U').charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </Link>
               <button onClick={handleSignOut} className="rounded-full border border-[#d7c3a1] px-3 py-2 text-[0.64rem] font-semibold uppercase tracking-[0.12em] text-[#171310] transition hover:border-[#f2801c] hover:text-[#ca6706]">
                 Sign out
               </button>
@@ -199,13 +201,15 @@ export function SiteHeader() {
             {!loadingUser && user ? (
               <div className="mt-4 border-t border-[#eadcc3] pt-4">
                 <div className="flex items-center gap-3">
-                  {user.image ? (
-                    <img src={user.image} alt="Profile" className="h-10 w-10 rounded-full object-cover ring-2 ring-[#f2801c]" />
-                  ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#171310] text-sm font-semibold text-[#f7f2eb]">
-                      {(user.email || user.phone || 'U').charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <Link href="/profile" onClick={() => setMenuOpen(false)} aria-label="Open profile">
+                    {user.image ? (
+                      <img src={user.image} alt="Profile" className="h-10 w-10 rounded-full object-cover ring-2 ring-[#f2801c]" />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#171310] text-sm font-semibold text-[#f7f2eb]">
+                        {(user.email || user.phone || 'U').charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </Link>
                   <button onClick={handleSignOut} className="text-sm font-medium text-[#171310]">
                     Sign out
                   </button>
