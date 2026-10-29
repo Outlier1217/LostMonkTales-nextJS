@@ -39,7 +39,7 @@ export default async function CoursePage({ params }: { params: { slug: string } 
                     {lesson.summary && (unlocked || lesson.isPreview) && <p className="mt-1 text-sm text-[#685e55]">{lesson.summary}</p>}
                     {embed && <div className="mt-3 aspect-video overflow-hidden rounded-xl"><iframe title={lesson.title} src={embed} className="h-full w-full" allowFullScreen /></div>}
                     {unlocked && lesson.type === 'TEXT' && lesson.content && <p className="mt-3 whitespace-pre-wrap text-sm text-[#403831]">{lesson.content}</p>}
-                    {unlocked && lesson.resources.length > 0 && <ul className="mt-3 space-y-1 text-sm">{lesson.resources.map(resource => <li key={resource.id}><a className="text-[#ca6706] underline" href={`/api/course-resources/${resource.id}`}>{resource.originalName}</a></li>)}</ul>}
+                    {unlocked && lesson.resources.length > 0 && <ul className="mt-3 space-y-4 text-sm">{lesson.resources.map(resource => <li key={resource.id}><a className="text-[#ca6706] underline" href={`/api/course-resources/${resource.id}`}>{resource.originalName} (Download)</a><iframe title={`Preview of ${resource.originalName}`} src={`/api/course-resources/${resource.id}?preview=1`} className="mt-2 h-96 w-full rounded-xl border border-[#e5dbc5] bg-white" /></li>)}</ul>}
                     {!unlocked && <p className="mt-1 text-sm text-[#685e55]">Preview this lesson by enrolling in the course.</p>}
                   </article>
                 })}
@@ -49,7 +49,7 @@ export default async function CoursePage({ params }: { params: { slug: string } 
         </div>
         {access && course.resources.length > 0 && <div className="mt-8 rounded-2xl border border-[#e5dbc5] p-5">
           <h3 className="font-serif text-2xl text-[#171310]">Course files</h3>
-          <ul className="mt-4 space-y-2 text-sm">{course.resources.map(resource => <li key={resource.id}><a className="text-[#ca6706] underline" href={`/api/course-resources/${resource.id}`}>{resource.originalName}</a></li>)}</ul>
+          <ul className="mt-4 space-y-4 text-sm">{course.resources.map(resource => <li key={resource.id}><a className="text-[#ca6706] underline" href={`/api/course-resources/${resource.id}`}>{resource.originalName} (Download)</a><iframe title={`Preview of ${resource.originalName}`} src={`/api/course-resources/${resource.id}?preview=1`} className="mt-2 h-96 w-full rounded-xl border border-[#e5dbc5] bg-white" /></li>)}</ul>
         </div>}
       </section>
     </main>
