@@ -19,8 +19,11 @@ export function youtubeEmbedUrl(value: string | null | undefined): string | null
   if (!value) return null
   try {
     const url = new URL(value)
-    if (!['youtube.com', 'www.youtube.com', 'youtu.be', 'www.youtu.be'].includes(url.hostname)) return null
-    const id = url.hostname.includes('youtu.be') ? url.pathname.slice(1) : url.searchParams.get('v') || url.pathname.match(/\/embed\/([^/]+)/)?.[1]
+    if (!['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be', 'www.youtu.be'].includes(url.hostname)) return null
+    const id = url.hostname.includes('youtu.be')
+      ? url.pathname.slice(1)
+      : url.searchParams.get('v')
+        || url.pathname.match(/\/(?:embed|shorts|live)\/([^/]+)/)?.[1]
     return id && /^[A-Za-z0-9_-]{11}$/.test(id) ? `https://www.youtube-nocookie.com/embed/${id}` : null
   } catch {
     return null

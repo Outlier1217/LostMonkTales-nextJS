@@ -8,6 +8,9 @@ export const courseFileTypes: Record<string, string> = {
   'text/csv': 'csv',
   'application/vnd.ms-excel': 'xls',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+  'text/plain': 'txt',
+  'application/vnd.ms-powerpoint': 'ppt',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
   'image/jpeg': 'jpg',
   'image/png': 'png',
   'image/webp': 'webp',
@@ -33,9 +36,16 @@ export async function assertCourseStorageCapacity(root: string, incomingBytes: n
   if (quota > 0) {
     const { readdir, stat } = await import('node:fs/promises')
     let used = 0
-    for (const entry of await readdir(root, { withFileTypes: true })) {
-      if (entry.isFile()) used += (await stat(path.join(root, entry.name))).size
+    const directorySize = async (directory: string): Promise<number> => {
+      let total = 0
+      for (const entry of await readdir(directory, { withFileTypes: true })) {
+        const entryPath = path.join(directory, entry.name)
+        if (entry.isDirectory()) total += await directorySize(entryPath)
+        else if (entry.isFile()) total += (await stat(entryPath)).size
+      }
+      return total
     }
+    used = await directorySize(root)
     if (used + incomingBytes > quota) throw new Error('The configured course storage quota has been reached.')
   }
 }
