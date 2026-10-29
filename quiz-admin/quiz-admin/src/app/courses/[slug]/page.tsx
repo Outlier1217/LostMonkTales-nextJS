@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { courseInclude, currentUserId, hasCourseAccess, youtubeEmbedUrl } from '@/lib/courses'
+import CourseAccessButton from '@/components/courses/CourseAccessButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +17,8 @@ export default async function CoursePage({ params }: { params: { slug: string } 
         <h1 className="mt-3 font-serif text-5xl text-[#171310]">{course.title}</h1>
         <p className="mt-5 text-lg text-[#685e55]">{course.description || course.shortDescription}</p>
         <div className="mt-6 rounded-xl bg-[#eadcc3] p-4 text-sm">
-          {course.accessType === 'FREE' ? 'This course is free.' : access ? 'You have access to this course.' : `Paid course · ${course.currency} ${course.price ?? ''}. Contact an administrator to arrange access.`}
+          {course.accessType === 'FREE' ? 'This course is free.' : access ? 'You have access to this course.' : `Paid course · ${course.currency} ${course.price ?? ''}. Payment is verified manually before access is granted.`}
+          <CourseAccessButton courseId={course.id} paid={course.accessType === 'PAID'} hasAccess={access} />
         </div>
       </div>
       <section className="mt-12 max-w-3xl">
@@ -34,7 +36,7 @@ export default async function CoursePage({ params }: { params: { slug: string } 
                       <h4 className="font-medium">{lesson.title}</h4>
                       <span className="text-xs text-[#685e55]">{unlocked ? lesson.type : 'Locked'}</span>
                     </div>
-                    {unlocked && lesson.summary && <p className="mt-1 text-sm text-[#685e55]">{lesson.summary}</p>}
+                    {lesson.summary && (unlocked || lesson.isPreview) && <p className="mt-1 text-sm text-[#685e55]">{lesson.summary}</p>}
                     {embed && <div className="mt-3 aspect-video overflow-hidden rounded-xl"><iframe title={lesson.title} src={embed} className="h-full w-full" allowFullScreen /></div>}
                     {unlocked && lesson.type === 'TEXT' && lesson.content && <p className="mt-3 whitespace-pre-wrap text-sm text-[#403831]">{lesson.content}</p>}
                     {unlocked && lesson.resources.length > 0 && <ul className="mt-3 space-y-1 text-sm">{lesson.resources.map(resource => <li key={resource.id}><a className="text-[#ca6706] underline" href={`/api/course-resources/${resource.id}`}>{resource.originalName}</a></li>)}</ul>}
