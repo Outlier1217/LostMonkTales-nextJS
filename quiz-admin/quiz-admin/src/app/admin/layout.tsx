@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpen, LayoutDashboard, ListChecks, Palette, FileText, Building2, Image as ImageIcon, MessageSquare, Users } from 'lucide-react'
+import { BookOpen, LayoutDashboard, ListChecks, Palette, FileText, Building2, Image as ImageIcon, MessageSquare, Users, GraduationCap } from 'lucide-react'
 import LogoutButton from "@/components/ui/LogoutButton"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -31,6 +31,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-all">
             <ListChecks className="w-4 h-4" />
             All Quizzes
+          </Link>
+          <Link href="/admin/courses"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-all">
+            <GraduationCap className="w-4 h-4" />
+            Courses
           </Link>
 
           <Link href="/admin/blogs"

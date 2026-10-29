@@ -2,7 +2,7 @@
 
 A full-stack content management system built with **Next.js 14**, **TypeScript**, **Prisma**, and **PostgreSQL (Neon)** for managing educational content, blogs, artwork, portraits, and architecture projects from a single admin dashboard.
 
-The platform uses a self-hosted VPS file server for media storage and is deployed on a Hostinger VPS using PM2.
+The platform uses PostgreSQL 18 and persistent local disk storage on a Hostinger VPS. Course files never use external object storage.
 
 ---
 
@@ -90,12 +90,12 @@ enum ArchitectureCategory {
 | --------------- | --------------------------- |
 | Framework       | Next.js 14 (App Router)     |
 | Language        | TypeScript                  |
-| Database        | PostgreSQL (Neon)           |
+| Database    | PostgreSQL 18 (Hostinger VPS, port 5433) |
 | ORM             | Prisma                      |
 | Styling         | Tailwind CSS                |
 | Icons           | Lucide React                |
 | Package Manager | pnpm                        |
-| File Storage    | Self-hosted VPS File Server |
+| File Storage    | Private local VPS filesystem for course resources; existing file server for public media |
 | Process Manager | PM2                         |
 
 ---
@@ -151,11 +151,63 @@ Application: 3030
 File Server: 3021
 ```
 
-### Upload Directory
+### Existing public-media upload directory
 
 ```bash
 /var/www/art-uploads/files
 ```
+
+### Private course-resource storage
+
+Course documents are written by the Next.js process directly to `COURSE_FILE_STORAGE_DIR`.
+The resource route checks the published course and the requesting user's entitlement before
+reading a file. The storage key is a random UUID with an allowlisted extension, so private
+files must not be placed in the public media directory.
+
+The default upload limit is 100 MiB and can be changed with
+`COURSE_MAX_FILE_SIZE_BYTES`. `COURSE_STORAGE_QUOTA_BYTES` optionally caps aggregate course
+storage; `0` leaves the filesystem as the practical limit. VPS disk capacity is the ultimate
+maximum content capacity.
+
+## Safe VPS deployment
+
+Run these commands on the Hostinger VPS as an administrator, adjusting the service account to
+the actual PM2 application owner:
+
+```bash
+sudo install -d -o <app-user> -g <app-group> -m 0750 /var/lib/lost-monk-tales/course-resources
+sudo -u <app-user> test -w /var/lib/lost-monk-tales/course-resources
+```
+
+Set the following in the VPS application's environment (never commit these values):
+
+```env
+DATABASE_URL=postgresql://<user>:<password>@127.0.0.1:5433/lost_monk_tales
+COURSE_FILE_STORAGE_DIR=/var/lib/lost-monk-tales/course-resources
+COURSE_MAX_FILE_SIZE_BYTES=104857600
+COURSE_STORAGE_QUOTA_BYTES=0
+```
+
+After backing up the production database, deploy the reviewed migration from the application
+directory. Do not run this against production from Codespaces:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm exec prisma migrate deploy
+pnpm exec prisma generate
+pnpm build
+pm2 restart <pm2-app-name> --update-env
+curl -fsS http://127.0.0.1:3030/courses >/dev/null
+sudo -u <app-user> sh -c 'printf persistent-check > /var/lib/lost-monk-tales/course-resources/.deployment-check && test -s /var/lib/lost-monk-tales/course-resources/.deployment-check'
+pm2 restart <pm2-app-name> --update-env
+sudo -u <app-user> test -s /var/lib/lost-monk-tales/course-resources/.deployment-check
+sudo rm /var/lib/lost-monk-tales/course-resources/.deployment-check
+```
+
+The development error `public.courses does not exist` means the course migration has not been
+applied to that development database. Apply it only to a safe development database with
+`pnpm exec prisma migrate deploy`; apply it to the VPS database only during the controlled
+deployment above.
 
 ---
 

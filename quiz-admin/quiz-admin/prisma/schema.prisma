@@ -19,6 +19,39 @@ enum BookmarkType {
   ARTWORK
 }
 
+enum CourseAccessType {
+  FREE
+  PAID
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum LessonType {
+  TEXT
+  YOUTUBE
+  RESOURCE
+}
+
+enum ResourceAccess {
+  PUBLIC
+  ENROLLED
+}
+
+enum EnrollmentSource {
+  PURCHASE
+  ADMIN_GRANT
+}
+
+enum OrderStatus {
+  PENDING
+  VERIFIED
+  FAILED
+  REFUNDED
+}
+
 model Quiz {
   id              String        @id @default(cuid())
   title           String
@@ -74,17 +107,163 @@ model Blog {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  email        String?       @unique
-  phone        String?       @unique
+  id           String              @id @default(cuid())
+  email        String?             @unique
+  phone        String?             @unique
   passwordHash String
   image        String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
   bookmarks    Bookmark[]
   quizAttempts QuizAttempt[]
+  enrollments  CourseEnrollment[]
+  courseOrders CourseOrder[]
+  accessGrants CourseAccessGrant[] @relation("GrantedUser")
+  grantsMade   CourseAccessGrant[] @relation("GrantingAdmin")
 
   @@map("users")
+}
+
+model Course {
+  id               String              @id @default(cuid())
+  title            String
+  slug             String              @unique
+  shortDescription String?
+  description      String?
+  thumbnailUrl     String?
+  category         String?
+  subject          String?
+  difficulty       Difficulty          @default(MEDIUM)
+  instructor       String?
+  learningOutcomes Json?
+  prerequisites    Json?
+  language         String              @default("English")
+  durationMinutes  Int?
+  accessType       CourseAccessType    @default(FREE)
+  price            Float?
+  currency         String              @default("INR")
+  status           CourseStatus        @default(DRAFT)
+  isFeatured       Boolean             @default(false)
+  featuredOrder    Int                 @default(0)
+  seoTitle         String?
+  seoDescription   String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  sections         CourseSection[]
+  resources        CourseResource[]
+  enrollments      CourseEnrollment[]
+  orders           CourseOrder[]
+  accessGrants     CourseAccessGrant[]
+
+  @@index([status, isFeatured, featuredOrder])
+  @@index([category])
+  @@map("courses")
+}
+
+model CourseSection {
+  id       String         @id @default(cuid())
+  courseId String
+  title    String
+  order    Int            @default(0)
+  course   Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons  CourseLesson[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+  @@map("course_sections")
+}
+
+model CourseLesson {
+  id              String           @id @default(cuid())
+  sectionId       String
+  title           String
+  slug            String
+  summary         String?
+  content         String?
+  type            LessonType       @default(TEXT)
+  youtubeUrl      String?
+  isPreview       Boolean          @default(false)
+  isPublished     Boolean          @default(false)
+  durationMinutes Int?
+  order           Int              @default(0)
+  section         CourseSection    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  resources       CourseResource[]
+
+  @@unique([sectionId, slug])
+  @@unique([sectionId, order])
+  @@index([sectionId])
+  @@map("course_lessons")
+}
+
+model CourseResource {
+  id           String         @id @default(cuid())
+  courseId     String
+  lessonId     String?
+  originalName String
+  storageKey   String         @unique
+  mimeType     String
+  extension    String
+  size         Int
+  access       ResourceAccess @default(ENROLLED)
+  uploadedBy   String
+  createdAt    DateTime       @default(now())
+  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson       CourseLesson?  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, lessonId])
+  @@map("course_resources")
+}
+
+model CourseEnrollment {
+  id        String           @id @default(cuid())
+  userId    String
+  courseId  String
+  source    EnrollmentSource
+  expiresAt DateTime?
+  revokedAt DateTime?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@map("course_enrollments")
+}
+
+model CourseOrder {
+  id                String      @id @default(cuid())
+  userId            String
+  courseId          String
+  amount            Float
+  currency          String
+  status            OrderStatus @default(PENDING)
+  provider          String?
+  providerReference String?
+  createdAt         DateTime    @default(now())
+  verifiedAt        DateTime?
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course            Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerReference])
+  @@index([userId, courseId])
+  @@map("course_orders")
+}
+
+model CourseAccessGrant {
+  id          String    @id @default(cuid())
+  userId      String
+  courseId    String
+  grantedById String?
+  reason      String?
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  user        User      @relation("GrantedUser", fields: [userId], references: [id], onDelete: Cascade)
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  grantedBy   User?     @relation("GrantingAdmin", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@index([userId, courseId])
+  @@map("course_access_grants")
 }
 
 model ContactMessage {
