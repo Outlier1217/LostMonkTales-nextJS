@@ -28,7 +28,7 @@ export default async function CoursePage({ params }: { params: { slug: string } 
             <div key={section.id} className="rounded-2xl border border-[#e5dbc5] p-5">
               <h3 className="font-serif text-2xl">{section.title}</h3>
               <div className="mt-4 space-y-3">
-                {section.lessons.filter(lesson => lesson.isPublished).map(lesson => {
+                {section.lessons.filter(lesson => course.accessType === 'FREE' || lesson.isPublished).map(lesson => {
                   const unlocked = access || lesson.isPreview
                   const embed = unlocked ? youtubeEmbedUrl(lesson.youtubeUrl) : null
                   return <article key={lesson.id} className="border-t border-[#eadcc3] pt-3">
@@ -47,6 +47,10 @@ export default async function CoursePage({ params }: { params: { slug: string } 
             </div>
           ))}
         </div>
+        {access && course.resources.length > 0 && <div className="mt-8 rounded-2xl border border-[#e5dbc5] p-5">
+          <h3 className="font-serif text-2xl text-[#171310]">Course files</h3>
+          <ul className="mt-4 space-y-2 text-sm">{course.resources.map(resource => <li key={resource.id}><a className="text-[#ca6706] underline" href={`/api/course-resources/${resource.id}`}>{resource.originalName}</a></li>)}</ul>
+        </div>}
       </section>
     </main>
   )

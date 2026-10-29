@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server'
+import { unlink } from 'node:fs/promises'
+import path from 'node:path'
 import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { youtubeEmbedUrl } from '@/lib/courses'
+import { courseStorageRoot } from '@/lib/course-storage'
 
 async function ensureAdmin() { return Boolean((await getSession())?.username) }
 
@@ -99,6 +102,24 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   if (!(await ensureAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  await prisma.course.delete({ where: { id: params.id } })
-  return NextResponse.json({ ok: true })
+  try {
+    const course = await prisma.course.findUnique({ where: { id: params.id }, select: { thumbnailUrl: true, resources: { select: { storageKey: true } } } })
+    if (!course) return NextResponse.json({ error: 'Course not found' }, { status: 404 })
+    await prisma.course.delete({ where: { id: params.id } })
+    try {
+      const root = courseStorageRoot()
+      const keys = course.resources.map(resource => resource.storageKey)
+      if (course.thumbnailUrl?.startsWith('/api/course-thumbnails/')) keys.push(course.thumbnailUrl.slice('/api/course-thumbnails/'.length))
+      await Promise.all(keys.map(async key => {
+        const filePath = path.resolve(root, key)
+        if (filePath.startsWith(`${root}${path.sep}`)) await unlink(filePath).catch(error => console.error('Course file cleanup failed', error))
+      }))
+    } catch (error) {
+      console.error('Course file cleanup failed', error)
+    }
+    return NextResponse.json({ ok: true })
+  } catch (error) {
+    const code = error && typeof error === 'object' && 'code' in error ? error.code : null
+    return NextResponse.json({ error: code === 'P2025' ? 'Course not found' : 'Unable to delete course.' }, { status: code === 'P2025' ? 404 : 500 })
+  }
 }
