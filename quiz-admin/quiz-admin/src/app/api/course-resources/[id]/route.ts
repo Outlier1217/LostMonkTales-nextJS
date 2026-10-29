@@ -7,8 +7,8 @@ import { currentUserId, hasCourseAccess } from '@/lib/courses'
 export const runtime = 'nodejs'
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
-  const resource = await prisma.courseResource.findUnique({ where: { id: params.id }, include: { course: { select: { status: true } }, lesson: { select: { isPublished: true } } } })
-  if (!resource || resource.course.status !== 'PUBLISHED' || (resource.lesson && !resource.lesson.isPublished)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  const resource = await prisma.courseResource.findUnique({ where: { id: params.id }, include: { course: { select: { status: true, accessType: true } }, lesson: { select: { isPublished: true } } } })
+  if (!resource || resource.course.status !== 'PUBLISHED' || (resource.lesson && !resource.lesson.isPublished && resource.course.accessType !== 'FREE')) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   if (resource.access !== 'PUBLIC' && !(await hasCourseAccess(resource.courseId, await currentUserId()))) return NextResponse.json({ error: 'Course access required' }, { status: 403 })
   try {
     const root = path.resolve(process.env.COURSE_FILE_STORAGE_DIR || '')

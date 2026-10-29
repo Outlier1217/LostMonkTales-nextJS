@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { youtubeEmbedUrl } from '@/lib/courses'
 
 async function admin() {
   const session = await getSession()
@@ -47,7 +48,37 @@ export async function POST(request: Request) {
   if (!(await admin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const body = await request.json() as Record<string, unknown>
-    const course = await prisma.course.create({ data: courseData(body) })
+    const rawSections = Array.isArray(body.sections) ? body.sections : []
+    const sections = rawSections.map((rawSection, sectionIndex) => {
+      if (!rawSection || typeof rawSection !== 'object') throw new Error('Each section needs a title.')
+      const section = rawSection as Record<string, unknown>
+      const title = typeof section.title === 'string' ? section.title.trim() : ''
+      if (!title) throw new Error('Each section needs a title.')
+      const rawLessons = Array.isArray(section.lessons) ? section.lessons : []
+      const lessons = rawLessons.map((rawLesson, lessonIndex) => {
+        if (!rawLesson || typeof rawLesson !== 'object') throw new Error('Each lesson needs a title.')
+        const lesson = rawLesson as Record<string, unknown>
+        const lessonTitle = typeof lesson.title === 'string' ? lesson.title.trim() : ''
+        if (!lessonTitle) throw new Error('Each lesson needs a title.')
+        const type = ['TEXT', 'YOUTUBE', 'RESOURCE'].includes(String(lesson.type)) ? lesson.type as 'TEXT' | 'YOUTUBE' | 'RESOURCE' : 'TEXT'
+        const youtubeUrl = typeof lesson.youtubeUrl === 'string' ? lesson.youtubeUrl.trim() || null : null
+        if (type === 'YOUTUBE' && !youtubeEmbedUrl(youtubeUrl)) throw new Error('Every YouTube lesson needs a valid YouTube URL.')
+        return {
+          title: lessonTitle,
+          slug: String(lesson.slug || lessonTitle || `lesson-${lessonIndex + 1}`).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || `lesson-${lessonIndex + 1}`,
+          summary: typeof lesson.summary === 'string' ? lesson.summary.trim() || null : null,
+          content: typeof lesson.content === 'string' ? lesson.content.trim() || null : null,
+          type,
+          youtubeUrl,
+          isPreview: lesson.isPreview === true,
+          isPublished: lesson.isPublished !== false,
+          durationMinutes: lesson.durationMinutes === '' || lesson.durationMinutes == null ? null : Number(lesson.durationMinutes),
+          order: lessonIndex,
+        }
+      })
+      return { title, order: sectionIndex, lessons: { create: lessons } }
+    })
+    const course = await prisma.course.create({ data: { ...courseData(body), sections: { create: sections } } })
     return NextResponse.json(course, { status: 201 })
   } catch (error) {
     const code = error && typeof error === 'object' && 'code' in error ? error.code : null
