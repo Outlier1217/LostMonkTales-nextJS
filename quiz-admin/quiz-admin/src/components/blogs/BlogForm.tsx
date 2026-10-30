@@ -363,10 +363,10 @@ export function BlogForm({ initialData }: BlogFormProps) {
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">
         <Button variant="secondary" onClick={() => handleSubmit(false)} loading={loading} disabled={loading || uploading}>
-          {isEdit && !initialData?.isPublished ? 'Save Draft' : 'Save as Draft'}
+          {isEdit && !initialData?.isPublished ? 'Save without featuring' : 'Save without featuring'}
         </Button>
         <Button onClick={() => handleSubmit(true)} loading={loading} disabled={loading || uploading}>
-          {isEdit ? 'Update & Publish' : 'Publish'}
+          {isEdit ? 'Update & Feature' : 'Feature on homepage'}
         </Button>
         <button onClick={() => router.back()} className="ml-auto text-sm text-gray-500 hover:text-gray-300 transition-colors">
           Cancel

@@ -231,7 +231,7 @@ export function ArchitectureForm({ project }: { project?: ArchitectureProject })
           onChange={e => setIsPublished(e.target.checked)}
           className="w-4 h-4 rounded border-gray-700 bg-gray-900 accent-violet-600"
         />
-        <span className="text-sm text-gray-300">Publish immediately</span>
+        <span className="text-sm text-gray-300">Feature on homepage</span>
       </label>
 
       <div className="flex items-center gap-3 pt-2">

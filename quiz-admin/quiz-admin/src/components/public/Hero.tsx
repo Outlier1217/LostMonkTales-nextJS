@@ -42,8 +42,8 @@ export default function Hero() {
           <div className="relative flex justify-center md:justify-end">
             <div className="relative h-[280px] w-[280px] md:h-[360px] md:w-[360px]">
               <Image
-                src="/fav-icon.png"
-                alt="Lost Monk Tales emblem"
+                src="/logo.png"
+                alt="Lost Monk Tales"
                 width={360}
                 height={360}
                 priority

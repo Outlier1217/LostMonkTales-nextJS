@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Plus, Pencil, Youtube } from 'lucide-react'
 import { DeleteBlogButton } from '@/components/blogs/DeleteBlogButton'
+import FeatureToggle from '@/components/admin/FeatureToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,8 +54,9 @@ export default async function BlogsPage() {
               </div>
               <div className="flex items-center gap-2 flex-none">
                 <Badge variant={blog.isPublished ? 'published' : 'draft'}>
-                  {blog.isPublished ? 'Published' : 'Draft'}
+                  {blog.isPublished ? 'Featured' : 'Not featured'}
                 </Badge>
+                <FeatureToggle id={blog.id} featured={blog.isPublished} endpoint="/api/blogs" />
                 <Link href={`/admin/blogs/${blog.id}/edit`}>
                   <Button variant="ghost" size="sm">
                     <Pencil className="w-3.5 h-3.5" />

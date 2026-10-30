@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/Badge'
 import { Pencil, Trash2 } from 'lucide-react'
+import FeatureToggle from '@/components/admin/FeatureToggle'
 
 const CATEGORY_LABELS: Record<string, string> = {
   INTERIOR: 'Interior',
@@ -73,9 +74,7 @@ export function ArchitectureList({ projects }: { projects: any[] }) {
               <span className="text-xs px-2 py-1 rounded-md bg-gray-800 text-gray-300">
                 {CATEGORY_LABELS[project.category] || project.category}
               </span>
-              <Badge variant={project.isPublished ? 'published' : 'draft'}>
-                {project.isPublished ? 'Published' : 'Draft'}
-              </Badge>
+              <FeatureToggle id={project.id} featured={project.isPublished} endpoint="/api/architecture" />
               <span className="text-xs text-gray-500">{images.length} img</span>
 
               <button

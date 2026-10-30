@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { PORTRAIT_CATEGORIES } from '@/lib/portrait-categories'
 import DeletePortraitButton from '@/components/portraits/DeletePortraitButton'
 import PublishToggle from '@/components/portraits/PublishToggle'
+import FeatureToggle from '@/components/admin/FeatureToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,7 +56,7 @@ export default async function PortraitsAdminPage() {
                     <div className="p-2.5 space-y-2">
                       <p className="text-xs text-gray-200 font-medium truncate">{p.title}</p>
                       <div className="flex items-center justify-between">
-                        <PublishToggle id={p.id} isPublished={p.isPublished} />
+                        <FeatureToggle id={p.id} featured={p.isPublished} endpoint="/api/portraits" />
                         <div className="flex items-center gap-1">
                           <Link href={`/admin/portraits/${p.id}/edit`} className="text-xs text-gray-500 hover:text-gray-300">
                             Edit

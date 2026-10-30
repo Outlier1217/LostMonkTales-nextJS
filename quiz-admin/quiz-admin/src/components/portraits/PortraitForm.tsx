@@ -96,7 +96,7 @@ export default function PortraitForm({ initialData }: PortraitFormProps) {
           onChange={(e) => setIsPublished(e.target.checked)}
           className="accent-violet-600"
         />
-        Publish immediately
+        Feature on homepage
       </label>
 
       <div className="flex gap-3">

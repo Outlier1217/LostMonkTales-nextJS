@@ -193,9 +193,9 @@ export function QuizForm({ initialData, mode }: QuizFormProps) {
         />
         <div>
           <label htmlFor="isPublished" className="text-sm font-medium text-gray-200 cursor-pointer">
-            Publish this quiz
+            Feature on homepage
           </label>
-          <p className="text-xs text-gray-500">Published quizzes are visible to users</p>
+          <p className="text-xs text-gray-500">Featured quizzes appear in the homepage collection</p>
         </div>
       </div>
 
