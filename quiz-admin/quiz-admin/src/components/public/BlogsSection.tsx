@@ -22,8 +22,6 @@ function formatDate(value: Date | string) {
 }
 
 export default function BlogsSection({ blogs }: { blogs: Blog[] }) {
-  if (blogs.length === 0) return null
-
   const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
@@ -35,6 +33,8 @@ export default function BlogsSection({ blogs }: { blogs: Blog[] }) {
 
     return () => clearInterval(timer)
   }, [blogs.length])
+
+  if (blogs.length === 0) return null
 
   const featured = blogs[activeIndex]
   const remaining = blogs.filter((_, index) => index !== activeIndex)

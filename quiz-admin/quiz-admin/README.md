@@ -265,16 +265,23 @@ model ArchitectureProject {
 
 ---
 
-## Environment Variables
+## Environment configuration
 
 ```env
-DATABASE_URL=postgresql://...
-FILE_SERVER_URL=http://localhost:3021
+DATABASE_URL=postgresql://<user>:<password>@127.0.0.1:5433/lost_monk_tales
+AUTH_SECRET=<long-random-secret>
+ADMIN_USERNAME=<admin-username>
+ADMIN_PASSWORD=<admin-password>
+FILE_SERVER_INTERNAL_URL=http://127.0.0.1:3021
+FILE_SERVER_PUBLIC_URL=http://88.222.244.226:3021
+COURSE_FILE_STORAGE_DIR=/var/lib/lost-monk-tales/course-resources
+COURSE_MAX_FILE_SIZE_BYTES=104857600
+COURSE_STORAGE_QUOTA_BYTES=0
 ```
 
 ---
 
-## Local Development
+## Local development
 
 Install dependencies:
 
@@ -302,39 +309,48 @@ pnpm dev
 
 ---
 
-## VPS Deployment
+## One-time VPS setup
+
+Install Node.js 20.20.2, pnpm 10.34.3, PostgreSQL 18 client tools, Git, curl, and PM2 for the
+same user that owns the existing `quiz-admin` PM2 process. Keep production `.env` only at
+`/var/www/lostmonktales/quiz-admin/quiz-admin/.env`; `pnpm deploy` never creates or overwrites it.
+
+Create persistent course storage without touching existing media:
+
+```bash
+sudo install -d -o <app-user> -g <app-group> -m 0750 /var/lib/lost-monk-tales/course-resources
+sudo -u <app-user> test -w /var/lib/lost-monk-tales/course-resources
+```
+
+Keep the existing `art-files` PM2 process on port 3021. If `quiz-admin` needs initial registration,
+use `ecosystem.config.cjs` and run `pm2 save`; do not start a second process.
+
+## Regular deployment
 
 ```bash
 cd /var/www/lostmonktales/quiz-admin/quiz-admin
-
-git pull
-
-pnpm db:generate
-
-pnpm build
-
-pm2 restart quiz-admin
+pnpm deploy
 ```
 
-> Run `pnpm install` only when new dependencies are added.
+The script validates the directory, required `.env` values, `main` branch, and PostgreSQL 18
+tools; pulls with `git pull --ff-only`; installs the frozen lockfile; creates and verifies a
+timestamped custom-format backup under `/root/db-backups` with mode 0700; applies migrations;
+generates Prisma Client; builds; restarts only the existing `quiz-admin` process with
+`--update-env`; saves PM2; and checks `http://127.0.0.1:3030/api/health`. It stops before
+migrations or restart if prerequisites, backup, or verification fail.
 
----
+## Backup recovery and rollback
 
-## PM2
-
-Start application:
+Backups are retained under `/root/db-backups` and can be inspected with:
 
 ```bash
-pm2 start "pnpm start" --name quiz-admin
+pg_restore --list /root/db-backups/<timestamped-backup>.dump
 ```
 
-Save PM2 configuration:
-
-```bash
-pm2 save
-```
-
----
+For a failed build, PM2 is not restarted. For an application rollback, check out a previously
+reviewed commit on `main` and run `pnpm deploy`. Database migrations are forward-only; restore
+a backup only under a separate, reviewed recovery plan. Never delete the database, course
+resources, or `/var/www/art-uploads/files`.
 
 ## Production Notes
 

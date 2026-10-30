@@ -9,7 +9,9 @@ async function authorized() {
 
 export async function GET() {
   if (!(await authorized())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  return NextResponse.json(await getAboutPage() || { ...defaultAbout, people: [] })
+  return NextResponse.json(await getAboutPage() || { ...defaultAbout, people: [] }, {
+    headers: { 'Cache-Control': 'no-store, max-age=0' },
+  })
 }
 
 export async function PUT(request: Request) {
