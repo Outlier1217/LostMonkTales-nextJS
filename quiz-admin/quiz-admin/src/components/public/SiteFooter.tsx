@@ -31,6 +31,7 @@ export function SiteFooter() {
               <Link href="/quizzes" className="transition hover:text-[#f2801c]">Quizzes</Link>
               <Link href="/store" className="transition hover:text-[#f2801c]">Store</Link>
               <Link href="/architecture" className="transition hover:text-[#f2801c]">Architecture</Link>
+              <Link href="/about" className="transition hover:text-[#f2801c]">About</Link>
               <Link href="/contact" className="transition hover:text-[#f2801c]">Contact Us</Link>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, ListChecks, Palette, FileText, Building2, Image as ImageIcon, MessageSquare, Users, GraduationCap, Sparkles } from 'lucide-react'
+import { LayoutDashboard, ListChecks, Palette, FileText, Building2, Image as ImageIcon, MessageSquare, Users, GraduationCap, Sparkles, Info } from 'lucide-react'
 import LogoutButton from "@/components/ui/LogoutButton"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -78,6 +78,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             text-gray-400 hover:text-white hover:bg-[#2a211d] transition-all">
           <Users className="w-4 h-4" />
           Users
+        </Link>
+        <Link href="/admin/about"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm
+            text-gray-400 hover:text-white hover:bg-[#2a211d] transition-all">
+          <Info className="w-4 h-4" />
+          About page
         </Link>
         </nav>
 

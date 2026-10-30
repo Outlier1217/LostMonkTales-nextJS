@@ -124,6 +124,41 @@ model User {
   @@map("users")
 }
 
+model AboutPage {
+  id                 String        @id @default(cuid())
+  title              String        @default("About Lost Monk Tales")
+  tagline            String        @default("Beyond Belief. Toward Understanding.")
+  introduction       String        @default("")
+  whatWeDo           String        @default("")
+  quizzesCourses     String        @default("")
+  studioVision       String        @default("")
+  philosophy         String        @default("")
+  closing            String        @default("")
+  founderName        String        @default("Ar. Sumit K. Pahil")
+  founderDesignation String        @default("Founder, Lost Monk Tales · Studio LM")
+  founderBio         String        @default("")
+  founderImage       String?
+  updatedAt          DateTime      @updatedAt
+  people             AboutPerson[]
+
+  @@map("about_pages")
+}
+
+model AboutPerson {
+  id          String    @id @default(cuid())
+  aboutPageId String
+  name        String
+  designation String
+  bio         String?
+  image       String?
+  kind        String    @default("TEAM")
+  sortOrder   Int       @default(0)
+  aboutPage   AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+
+  @@index([aboutPageId, kind, sortOrder])
+  @@map("about_people")
+}
+
 model Course {
   id               String              @id @default(cuid())
   title            String
