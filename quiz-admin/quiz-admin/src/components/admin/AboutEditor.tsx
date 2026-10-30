@@ -27,9 +27,10 @@ export default function AboutEditor() {
   const [person, setPerson] = useState({ ...emptyPerson })
   const [message, setMessage] = useState('')
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
-    fetch('/api/admin/about').then(async response => {
+    fetch('/api/admin/about', { cache: 'no-store' }).then(async response => {
       if (!response.ok) throw new Error('Unable to load About content.')
       setAbout(await response.json())
     }).catch(error => setMessage(error instanceof Error ? error.message : 'Unable to load About content.'))
@@ -45,31 +46,54 @@ export default function AboutEditor() {
   }
 
   async function upload(file: File, target: 'founderImage' | 'person') {
+    setUploading(true)
+    setMessage(`Uploading ${file.name}...`)
     const form = new FormData()
     form.append('files', file)
-    const response = await fetch('/api/upload', { method: 'POST', body: form })
-    const data = await response.json()
-    if (!response.ok || !data.urls?.[0]) throw new Error('Image upload failed.')
-    if (target === 'founderImage') update('founderImage', data.urls[0])
-    else setPerson(current => ({ ...current, image: data.urls[0] }))
+    try {
+      const response = await fetch('/api/upload', { method: 'POST', body: form })
+      const data = await response.json() as { urls?: string[]; error?: string }
+      const uploadedUrl = data.urls?.[0]
+      if (!response.ok || !uploadedUrl) throw new Error(data.error || 'Image upload failed.')
+      if (target === 'founderImage') update('founderImage', uploadedUrl)
+      else setPerson(current => ({ ...current, image: uploadedUrl }))
+      setMessage('Image uploaded. Save the About page to persist the URL.')
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Image upload failed.')
+    } finally {
+      setUploading(false)
+    }
   }
 
   async function save() {
     if (!about) return
     setSaving(true); setMessage('')
-    const response = await fetch('/api/admin/about', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(about) })
-    setMessage(response.ok ? 'About page saved.' : 'Unable to save About page.')
-    setSaving(false)
-    router.refresh()
+    try {
+      const response = await fetch('/api/admin/about', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(about) })
+      const data = await response.json() as { error?: string }
+      if (!response.ok) throw new Error(data.error || 'Unable to save About page.')
+      setMessage('About page saved successfully.')
+      router.refresh()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to save About page.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function addPerson() {
     if (!person.name.trim() || !person.designation.trim()) return setMessage('Name and designation are required.')
-    const response = await fetch('/api/admin/about', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(person) })
-    if (!response.ok) return setMessage('Unable to add person.')
-    setPerson({ ...emptyPerson }); setMessage('Person added.')
-    const refreshed = await fetch('/api/admin/about')
-    setAbout(await refreshed.json())
+    try {
+      const response = await fetch('/api/admin/about', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(person) })
+      const data = await response.json() as { error?: string }
+      if (!response.ok) throw new Error(data.error || 'Unable to add person.')
+      setPerson({ ...emptyPerson }); setMessage('Team member added successfully.')
+      const refreshed = await fetch('/api/admin/about', { cache: 'no-store' })
+      if (!refreshed.ok) throw new Error('Person added, but the list could not be refreshed.')
+      setAbout(await refreshed.json())
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to add person.')
+    }
   }
 
   async function removePerson(id: string) {
@@ -90,7 +114,7 @@ export default function AboutEditor() {
           </label>
         ))}
         <label className="block text-sm text-gray-300">Upload founder image<input type="file" accept="image/*" onChange={event => event.target.files?.[0] && upload(event.target.files[0], 'founderImage')} className="mt-2 block text-xs text-gray-500" /></label>
-        <Button onClick={save} loading={saving}>Save About page</Button>
+        <Button onClick={save} loading={saving} disabled={saving || uploading}>Save About page</Button>
       </section>
       <section className="space-y-5 rounded-2xl border border-gray-800 bg-gray-900 p-6">
         <div><h2 className="text-xl font-semibold text-white">Founder & team</h2><p className="mt-1 text-sm text-gray-500">Add additional team profiles with a name, designation, bio, and image.</p></div>
@@ -101,7 +125,7 @@ export default function AboutEditor() {
           <input placeholder="Image URL" value={person.image} onChange={event => setPerson({ ...person, image: event.target.value })} className="rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-sm text-white" />
           <label className="text-xs text-gray-500">Upload image<input type="file" accept="image/*" onChange={event => event.target.files?.[0] && upload(event.target.files[0], 'person')} className="mt-2 block" /></label>
         </div>
-        <Button onClick={addPerson}>Add team member</Button>
+        <Button onClick={addPerson} disabled={uploading}>Add team member</Button>
         <div className="space-y-2 border-t border-gray-800 pt-4">{about.people.filter(item => item.kind === 'TEAM').map(item => <div key={item.id} className="flex items-center justify-between rounded-lg bg-gray-950 p-3"><div><p className="text-sm text-white">{item.name}</p><p className="text-xs text-gray-500">{item.designation}</p></div><button onClick={() => removePerson(item.id)} className="text-xs text-red-400 hover:text-red-300">Remove</button></div>)}</div>
       </section>
       {message && <p className="text-sm text-[#f2801c]">{message}</p>}
