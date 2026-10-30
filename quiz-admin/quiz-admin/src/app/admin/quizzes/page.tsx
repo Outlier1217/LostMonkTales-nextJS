@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Plus, Pencil, FileQuestion } from 'lucide-react'
 import { DeleteQuizButton } from '@/components/quizzes/DeleteQuizButton'
+import FeatureToggle from '@/components/admin/FeatureToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,11 +66,12 @@ export default async function QuizzesPage() {
                   </td>
                   <td className="p-4">
                     <Badge variant={quiz.isPublished ? 'published' : 'draft'}>
-                      {quiz.isPublished ? 'Published' : 'Draft'}
+                      {quiz.isPublished ? 'Featured' : 'Not featured'}
                     </Badge>
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2 justify-end">
+                      <FeatureToggle id={quiz.id} featured={quiz.isPublished} endpoint="/api/quizzes" method="PUT" />
                       <Link href={`/admin/quizzes/${quiz.id}`}>
                         <Button variant="ghost" size="sm"><Pencil className="w-3.5 h-3.5" /></Button>
                       </Link>

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { Plus, Pencil } from 'lucide-react'
 import PublishToggle from '@/components/art/PublishToggle'
+import FeatureToggle from '@/components/admin/FeatureToggle'
 
 export default async function ArtworksPage() {
   const artworks = await prisma.artwork.findMany({
@@ -105,7 +106,7 @@ export default async function ArtworksPage() {
                     >
                       <Pencil className="w-3 h-3" /> Edit
                     </Link>
-                    <PublishToggle id={art.id} published={art.isPublished} />
+                    <FeatureToggle id={art.id} featured={art.isPublished} endpoint="/api/art" />
                   </div>
                 </div>
               </div>

@@ -10,6 +10,7 @@ type Item = {
 }
 
 const viewAllHref: Record<string, string> = {
+  Blogs: '/blogs',
   Quizzes: '/quizzes',
   'Art Store': '/store',
   'Art & Portraits': '/art-portraits',
@@ -38,7 +39,7 @@ export default function ContentSection({
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
         {items.map(item => (
-          <Link key={item.id} href={item.href} className="group block overflow-hidden rounded-[1.6rem] border border-[#eddcc4] bg-white/80 shadow-[0_18px_50px_rgba(23,19,16,0.04)] transition hover:-translate-y-1 hover:border-[#f2801c]">
+          <Link key={item.id} href={item.href} className="group block overflow-hidden rounded-[1.6rem] border border-[#eadcc3] bg-white/80 shadow-[0_18px_50px_rgba(23,19,16,0.04)] transition duration-300 hover:-translate-y-1 hover:border-[#f2801c] hover:shadow-[0_24px_60px_rgba(23,19,16,0.1)]">
             <div className="relative aspect-[4/5] overflow-hidden bg-[#f9e9d2]">
               {item.image ? (
                 <img

@@ -134,7 +134,7 @@ export default function ArtworkForm({ categories, initial = {} }: Props) {
           className="w-4 h-4 accent-violet-500"
         />
         <label htmlFor="publish" className="text-sm text-gray-300">
-          Publish immediately
+          Feature on homepage
         </label>
       </div>
 
