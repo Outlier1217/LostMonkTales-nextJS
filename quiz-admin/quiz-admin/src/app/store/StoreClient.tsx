@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ArtCard from './ArtCard'
+import { Search } from 'lucide-react'
 
 interface Category { id: string; name: string }
 interface Artwork {
@@ -17,10 +18,14 @@ export default function StoreClient({
   categories: Category[]
 }) {
   const [active, setActive] = useState<string>('all')
+  const [query, setQuery] = useState('')
 
   const filtered = active === 'all'
     ? artworks
     : artworks.filter(a => a.category.id === active)
+  const searched = query.trim()
+    ? filtered.filter(art => `${art.title} ${art.description || ''} ${art.category.name}`.toLowerCase().includes(query.trim().toLowerCase()))
+    : filtered
 
   return (
     <main className="lm-page">
@@ -63,15 +68,19 @@ export default function StoreClient({
             )
           })}
         </div>
+        <label className="relative mb-8 block w-full max-w-xl">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8a7b6d]" />
+          <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search store by title, category, or keyword" aria-label="Search store" className="w-full rounded-full border border-[#d7c3a1] bg-white/60 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-[#f2801c]" />
+        </label>
 
         {/* Grid */}
-        {filtered.length === 0 ? (
+        {searched.length === 0 ? (
           <div className="rounded-[2rem] border border-[#eadbc0] bg-white/60 py-20 text-center text-[#5f564f]">
             <p>No artworks in this category yet</p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filtered.map(art => (
+            {searched.map(art => (
               <ArtCard key={art.id} art={art} />
             ))}
           </div>

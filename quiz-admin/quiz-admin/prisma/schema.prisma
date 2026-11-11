@@ -120,6 +120,9 @@ model User {
   courseOrders CourseOrder[]
   accessGrants CourseAccessGrant[] @relation("GrantedUser")
   grantsMade   CourseAccessGrant[] @relation("GrantingAdmin")
+  contentLikes ContentLike[]
+  comments     ContentComment[]
+  contentShares ContentShare[]
 
   @@map("users")
 }
@@ -403,6 +406,50 @@ model Bookmark {
   @@unique([userId, artworkId])
   @@index([userId, type])
   @@map("bookmarks")
+}
+
+model ContentLike {
+  id         String   @id @default(cuid())
+  userId     String
+  targetType String
+  targetId   String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@map("content_likes")
+}
+
+model ContentComment {
+  id         String           @id @default(cuid())
+  userId     String
+  targetType String
+  targetId   String
+  body       String
+  parentId   String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent     ContentComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    ContentComment[] @relation("CommentReplies")
+
+  @@index([targetType, targetId, createdAt])
+  @@index([parentId])
+  @@map("content_comments")
+}
+
+model ContentShare {
+  id         String   @id @default(cuid())
+  userId     String
+  targetType String
+  targetId   String
+  result     Json?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([targetType, targetId, createdAt])
+  @@map("content_shares")
 }
 
 model QuizAttempt {

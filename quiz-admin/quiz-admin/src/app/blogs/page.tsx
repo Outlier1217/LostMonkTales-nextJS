@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { getBlogExcerpt } from '@/lib/blog-content'
+import LiveSearch from '@/components/public/LiveSearch'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,9 +13,20 @@ function formatDate(value: Date | string) {
   })
 }
 
-export default async function BlogsPage() {
+export default async function BlogsPage({ searchParams }: { searchParams: { q?: string } }) {
+  const q = searchParams.q?.trim() || ''
   const blogs = await prisma.blog.findMany({
-    where: { isPublished: true },
+    where: {
+      isPublished: true,
+      ...(q ? {
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { category: { contains: q, mode: 'insensitive' } },
+          { topic: { contains: q, mode: 'insensitive' } },
+          { content: { contains: q, mode: 'insensitive' } },
+        ],
+      } : {}),
+    },
     orderBy: { createdAt: 'desc' },
   })
 
@@ -24,11 +36,12 @@ export default async function BlogsPage() {
         <div className="mb-10">
           <p className="lm-mono mb-3 text-[0.68rem] text-[#ca6706]">Journal</p>
           <h1 className="lm-display text-4xl text-[#171310] md:text-6xl">Stories from the archive</h1>
+          <div className="mt-6"><LiveSearch value={q} placeholder="Search blogs by title, topic, or keyword" /></div>
         </div>
 
         {blogs.length === 0 ? (
           <div className="rounded-[2rem] border border-[#eadbc0] bg-white/60 p-8 text-[#5f564f]">
-            No published blogs yet.
+            {q ? 'No blogs match your search.' : 'No published blogs yet.'}
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">

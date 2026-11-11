@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import ShareArtworkButton from '../ShareArtworkButton'
 import { BookmarkButton } from '@/components/public/BookmarkButton'
+import { InteractionPanel } from '@/components/public/InteractionPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,6 +67,7 @@ export default async function StoreItemPage({ params }: { params: { id: string }
             <div className="mt-6">
               <ShareArtworkButton title={artwork.title} />
             </div>
+            <InteractionPanel targetType="ARTWORK" targetId={artwork.id} title={artwork.title} shareOnly />
           </div>
         </div>
       </article>

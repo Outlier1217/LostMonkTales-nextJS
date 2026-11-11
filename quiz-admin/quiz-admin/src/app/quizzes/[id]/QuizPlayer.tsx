@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { InteractionPanel } from '@/components/public/InteractionPanel'
 
 type Option = { id: string; text: string }
 
@@ -169,6 +170,7 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
             More quizzes
           </Link>
         </div>
+        <InteractionPanel targetType="QUIZ" targetId={quiz.id} title={`${quiz.title} result`} result={result} shareOnly />
       </div>
     )
   }

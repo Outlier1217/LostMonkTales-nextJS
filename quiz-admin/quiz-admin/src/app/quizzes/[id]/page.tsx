@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { QuizPlayer } from './QuizPlayer'
 import { BookmarkButton } from '@/components/public/BookmarkButton'
+import { InteractionPanel } from '@/components/public/InteractionPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,6 +79,7 @@ export default async function QuizDetailPage({ params }: { params: { id: string 
               }}
             />
           </div>
+          <InteractionPanel targetType="QUIZ" targetId={quiz.id} title={quiz.title} />
         </div>
       </article>
     </main>
