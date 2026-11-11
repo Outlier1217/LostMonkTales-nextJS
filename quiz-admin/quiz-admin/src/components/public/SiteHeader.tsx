@@ -9,11 +9,11 @@ import { Menu, X, UserCircle2 } from 'lucide-react'
 const navItems = [
   { href: '/', label: 'Home' },
   { href: '/blogs', label: 'Blogs' },
-  { href: '/quizzes', label: 'Quizzes' },
+  { href: '/quizzes', label: 'Take Quizzes' },
   { href: '/courses', label: 'Courses' },
-  { href: '/store', label: 'Store' },
-  { href: '/art-portraits', label: 'Portraits' },
+  { href: '/art-portraits', label: 'Art' },
   { href: '/architecture', label: 'Architecture' },
+  { href: '/store', label: 'Store' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]

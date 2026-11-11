@@ -3,6 +3,7 @@ import Hero from '@/components/public/Hero'
 import BlogsSection from '@/components/public/BlogsSection'
 import ContentSection from '@/components/public/ContentSection'
 import { getFeaturedCourses } from '@/lib/featured-courses'
+import HomeHighlightsPopup from '@/components/public/HomeHighlightsPopup'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,6 +40,20 @@ export default async function HomePage() {
           image: course.thumbnailUrl || undefined,
           tag: course.accessType === 'FREE' ? 'Free' : `${course.currency} ${course.price ?? ''}`,
         }))}
+      />
+      <HomeHighlightsPopup
+        blog={blogs[0] ? {
+          title: blogs[0].title,
+          href: `/blogs/${blogs[0].id}`,
+          image: blogs[0].thumbnailUrl,
+          label: 'Latest blog',
+        } : undefined}
+        course={courses[0] ? {
+          title: courses[0].title,
+          href: `/courses/${courses[0].slug}`,
+          image: courses[0].thumbnailUrl,
+          label: 'Featured course',
+        } : undefined}
       />
 
       <ContentSection

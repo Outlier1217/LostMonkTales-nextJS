@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { publishedCourseWhere } from '@/lib/courses'
+import LiveSearch from '@/components/public/LiveSearch'
+import CourseCategorySelect from '@/components/public/CourseCategorySelect'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,14 +24,10 @@ export default async function CoursesPage({ searchParams }: { searchParams: { q?
       <p className="text-xs uppercase tracking-[0.2em] text-[#ca6706]">Learn</p>
       <h1 className="mt-3 font-serif text-5xl text-[#171310]">Courses</h1>
       <p className="mt-4 max-w-2xl text-[#685e55]">Thoughtful lessons, practical resources, and a clear path through every subject.</p>
-      <form className="mt-8 flex flex-wrap gap-3" action="/courses">
-        <input name="q" defaultValue={q} placeholder="Search courses" className="rounded-full border border-[#d7c3a1] bg-transparent px-4 py-3" />
-        <select name="category" defaultValue={category || ''} className="rounded-full border border-[#d7c3a1] bg-transparent px-4 py-3">
-          <option value="">All categories</option>
-          {categories.map(item => item.category && <option key={item.category} value={item.category}>{item.category}</option>)}
-        </select>
-        <button className="rounded-full bg-[#171310] px-5 py-3 text-sm text-white">Filter</button>
-      </form>
+      <div className="mt-8 flex flex-wrap items-center gap-3">
+        <LiveSearch value={q} placeholder="Search courses by title, subject, or keyword" />
+        <CourseCategorySelect value={category || ''} categories={categories.flatMap(item => item.category ? [item.category] : [])} />
+      </div>
       {courses.length ? (
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {courses.map(course => (

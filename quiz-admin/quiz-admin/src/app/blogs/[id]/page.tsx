@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { isHtmlContent, sanitizeBlogHtml } from '@/lib/blog-content'
 import { YoutubeEmbed } from '@/components/blogs/YoutubeEmbed'
 import { BookmarkButton } from '@/components/public/BookmarkButton'
+import { InteractionPanel } from '@/components/public/InteractionPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -89,6 +90,7 @@ export default async function BlogDetailPage({ params }: { params: { id: string 
               ))
             )}
           </div>
+          <InteractionPanel targetType="BLOG" targetId={blog.id} title={blog.title} />
         </div>
       </article>
     </main>

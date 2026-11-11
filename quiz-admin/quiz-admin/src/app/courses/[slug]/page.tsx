@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { courseInclude, currentUserId, hasCourseAccess, youtubeEmbedUrl } from '@/lib/courses'
 import CourseAccessButton from '@/components/courses/CourseAccessButton'
+import { InteractionPanel } from '@/components/public/InteractionPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,6 +53,7 @@ export default async function CoursePage({ params }: { params: { slug: string } 
           <ul className="mt-4 space-y-4 text-sm">{course.resources.map(resource => <li key={resource.id}><a className="text-[#ca6706] underline" href={`/api/course-resources/${resource.id}`}>{resource.originalName} (Download)</a><iframe title={`Preview of ${resource.originalName}`} src={`/api/course-resources/${resource.id}?preview=1`} className="mt-2 h-96 w-full rounded-xl border border-[#e5dbc5] bg-white" /></li>)}</ul>
         </div>}
       </section>
+      <div className="max-w-3xl"><InteractionPanel targetType="COURSE" targetId={course.id} title={course.title} /></div>
     </main>
   )
 }
