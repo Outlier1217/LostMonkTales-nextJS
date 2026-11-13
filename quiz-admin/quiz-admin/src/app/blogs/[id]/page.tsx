@@ -1,12 +1,33 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
-import { isHtmlContent, sanitizeBlogHtml } from '@/lib/blog-content'
+import { getBlogExcerpt, isHtmlContent, sanitizeBlogHtml } from '@/lib/blog-content'
 import { YoutubeEmbed } from '@/components/blogs/YoutubeEmbed'
 import { BookmarkButton } from '@/components/public/BookmarkButton'
 import { InteractionPanel } from '@/components/public/InteractionPanel'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const blog = await prisma.blog.findUnique({
+    where: { id: params.id },
+    select: { title: true, content: true, category: true, topic: true, tags: true, hashtags: true, isPublished: true },
+  })
+
+  if (!blog || !blog.isPublished) return {}
+
+  const keywords = [blog.category, blog.topic, blog.tags, blog.hashtags]
+    .flatMap(value => value?.split(',') ?? [])
+    .map(value => value.trim())
+    .filter(Boolean)
+
+  return {
+    title: blog.title,
+    description: getBlogExcerpt(blog.content),
+    keywords,
+  }
+}
 
 function formatDate(value: Date | string) {
   return new Date(value).toLocaleDateString('en-IN', {

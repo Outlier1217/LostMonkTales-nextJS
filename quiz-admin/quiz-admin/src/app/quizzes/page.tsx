@@ -15,6 +15,8 @@ export default async function QuizzesPage({ searchParams }: { searchParams: { q?
           { description: { contains: q, mode: 'insensitive' } },
           { category: { contains: q, mode: 'insensitive' } },
           { topic: { contains: q, mode: 'insensitive' } },
+          { tags: { contains: q, mode: 'insensitive' } },
+          { hashtags: { contains: q, mode: 'insensitive' } },
         ],
       } : {}),
     },

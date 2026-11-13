@@ -12,6 +12,8 @@ interface BlogFormProps {
     title: string
     category: string
     topic: string
+    tags: string | null
+    hashtags: string | null
     content: string
     thumbnailUrl: string | null
     youtubeUrl: string | null
@@ -68,6 +70,8 @@ export function BlogForm({ initialData }: BlogFormProps) {
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [category, setCategory] = useState(initialData?.category ?? '')
   const [topic, setTopic] = useState(initialData?.topic ?? '')
+  const [tags, setTags] = useState(initialData?.tags ?? '')
+  const [hashtags, setHashtags] = useState(initialData?.hashtags ?? '')
   const [content, setContent] = useState(initialData?.content ?? '')
   const [thumbnailUrl, setThumbnailUrl] = useState(initialData?.thumbnailUrl ?? '')
   const [youtubeUrl, setYoutubeUrl] = useState(initialData?.youtubeUrl ?? '')
@@ -211,7 +215,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
     setLoading(true)
     try {
       const payload = {
-        title, category, topic, content, thumbnailUrl: thumbnailUrl || null,
+        title, category, topic, tags: tags || null, hashtags: hashtags || null, content, thumbnailUrl: thumbnailUrl || null,
         youtubeUrl: youtubeUrl || null,
         isPublished: publish,
       }
@@ -270,6 +274,21 @@ export function BlogForm({ initialData }: BlogFormProps) {
           placeholder="Blog title"
           value={title}
           onChange={e => setTitle(e.target.value)}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Input
+          label="Tags"
+          placeholder="e.g. investing, beginner, practice"
+          value={tags}
+          onChange={e => setTags(e.target.value)}
+        />
+        <Input
+          label="SEO Hashtags"
+          placeholder="e.g. #Investing, #Tutorial"
+          value={hashtags}
+          onChange={e => setHashtags(e.target.value)}
         />
       </div>
 

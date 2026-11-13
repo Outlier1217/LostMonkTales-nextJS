@@ -12,11 +12,6 @@ interface QuizFormProps {
   mode: 'create' | 'edit'
 }
 
-const CATEGORIES = [
-  'Mathematics', 'Science', 'English', 'History', 'Geography',
-  'Computer Science', 'Finance', 'Blockchain', 'General Knowledge', 'Other'
-]
-
 export function QuizForm({ initialData, mode }: QuizFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -26,6 +21,8 @@ export function QuizForm({ initialData, mode }: QuizFormProps) {
     difficulty: initialData?.difficulty || 'MEDIUM',
     category: initialData?.category || 'General Knowledge',
     topic: initialData?.topic || '',
+    tags: initialData?.tags || '',
+    hashtags: initialData?.hashtags || '',
     coverImage: initialData?.coverImage || '',
     timeLimit: initialData?.timeLimit ?? 30,
     negativeMarking: initialData?.negativeMarking ?? false,
@@ -99,25 +96,39 @@ export function QuizForm({ initialData, mode }: QuizFormProps) {
           <option value="HARD">🔴 Hard</option>
         </Select>
 
-        <Select
+        <Input
           id="category"
           label="Category *"
+          placeholder="e.g. Mathematics, Science, Finance"
           value={form.category}
           onChange={e => set('category', e.target.value)}
-        >
-          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-        </Select>
+          required
+        />
 
-        <div className="md:col-span-2">
-          <Input
-            id="topic"
-            label="Topic *"
-            placeholder="e.g. Derivatives, Equity, Options Trading"
-            value={form.topic}
-            onChange={e => set('topic', e.target.value)}
-            required
-          />
-        </div>
+        <Input
+          id="topic"
+          label="Topic *"
+          placeholder="e.g. Derivatives, Equity, Options Trading"
+          value={form.topic}
+          onChange={e => set('topic', e.target.value)}
+          required
+        />
+
+        <Input
+          id="tags"
+          label="Tags"
+          placeholder="e.g. investing, beginner, practice"
+          value={form.tags}
+          onChange={e => set('tags', e.target.value)}
+        />
+
+        <Input
+          id="hashtags"
+          label="SEO Hashtags"
+          placeholder="e.g. #Investing, #Quiz"
+          value={form.hashtags}
+          onChange={e => set('hashtags', e.target.value)}
+        />
 
         <div className="md:col-span-2 space-y-3">
           <div>

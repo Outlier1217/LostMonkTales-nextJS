@@ -23,6 +23,8 @@ export default async function BlogsPage({ searchParams }: { searchParams: { q?: 
           { title: { contains: q, mode: 'insensitive' } },
           { category: { contains: q, mode: 'insensitive' } },
           { topic: { contains: q, mode: 'insensitive' } },
+          { tags: { contains: q, mode: 'insensitive' } },
+          { hashtags: { contains: q, mode: 'insensitive' } },
           { content: { contains: q, mode: 'insensitive' } },
         ],
       } : {}),

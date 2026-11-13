@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { QuizPlayer } from './QuizPlayer'
@@ -6,6 +7,26 @@ import { BookmarkButton } from '@/components/public/BookmarkButton'
 import { InteractionPanel } from '@/components/public/InteractionPanel'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const quiz = await prisma.quiz.findUnique({
+    where: { id: params.id },
+    select: { title: true, description: true, category: true, topic: true, tags: true, hashtags: true, isPublished: true },
+  })
+
+  if (!quiz || !quiz.isPublished) return {}
+
+  const keywords = [quiz.category, quiz.topic, quiz.tags, quiz.hashtags]
+    .flatMap(value => value?.split(',') ?? [])
+    .map(value => value.trim())
+    .filter(Boolean)
+
+  return {
+    title: quiz.title,
+    description: quiz.description ?? undefined,
+    keywords,
+  }
+}
 
 export default async function QuizDetailPage({ params }: { params: { id: string } }) {
   const quiz = await prisma.quiz.findUnique({

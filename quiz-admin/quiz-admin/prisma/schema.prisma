@@ -59,6 +59,8 @@ model Quiz {
   difficulty      Difficulty    @default(MEDIUM)
   category        String
   topic           String
+  tags            String?
+  hashtags        String?
   coverImage      String?
   timeLimit       Int // in minutes, 0 = no limit
   negativeMarking Boolean       @default(false)
@@ -96,6 +98,8 @@ model Blog {
   title        String
   category     String
   topic        String
+  tags         String?
+  hashtags     String?
   content      String // markdown/rich text
   thumbnailUrl String?
   youtubeUrl   String?
@@ -108,21 +112,21 @@ model Blog {
 }
 
 model User {
-  id           String              @id @default(cuid())
-  email        String?             @unique
-  phone        String?             @unique
-  passwordHash String
-  image        String?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-  bookmarks    Bookmark[]
-  quizAttempts QuizAttempt[]
-  enrollments  CourseEnrollment[]
-  courseOrders CourseOrder[]
-  accessGrants CourseAccessGrant[] @relation("GrantedUser")
-  grantsMade   CourseAccessGrant[] @relation("GrantingAdmin")
-  contentLikes ContentLike[]
-  comments     ContentComment[]
+  id            String              @id @default(cuid())
+  email         String?             @unique
+  phone         String?             @unique
+  passwordHash  String
+  image         String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  bookmarks     Bookmark[]
+  quizAttempts  QuizAttempt[]
+  enrollments   CourseEnrollment[]
+  courseOrders  CourseOrder[]
+  accessGrants  CourseAccessGrant[] @relation("GrantedUser")
+  grantsMade    CourseAccessGrant[] @relation("GrantingAdmin")
+  contentLikes  ContentLike[]
+  comments      ContentComment[]
   contentShares ContentShare[]
 
   @@map("users")
