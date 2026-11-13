@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
+import { ZoomableImage } from '@/components/public/ZoomableImage'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +24,12 @@ export default async function ArchitectureDetailPage({ params }: { params: { id:
             {images.length > 0 ? (
               <div className="grid gap-3 md:grid-cols-2">
                 {images.map((image, index) => (
-                  <img key={`${image}-${index}`} src={image} alt={`${project.title} ${index + 1}`} className="h-full min-h-[220px] w-full rounded-[1.2rem] object-cover" />
+                  <ZoomableImage
+                    key={`${image}-${index}`}
+                    src={image}
+                    alt={`${project.title} ${index + 1}`}
+                    className="h-full min-h-[220px] rounded-[1.2rem]"
+                  />
                 ))}
               </div>
             ) : (

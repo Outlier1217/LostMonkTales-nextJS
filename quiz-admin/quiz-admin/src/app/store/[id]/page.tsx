@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import ShareArtworkButton from '../ShareArtworkButton'
 import { BookmarkButton } from '@/components/public/BookmarkButton'
 import { InteractionPanel } from '@/components/public/InteractionPanel'
+import { ZoomableImage } from '@/components/public/ZoomableImage'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,11 +30,11 @@ export default async function StoreItemPage({ params }: { params: { id: string }
             {images.length > 0 ? (
               <div className="grid gap-3 md:grid-cols-2">
                 {images.map((image, index) => (
-                  <img
+                  <ZoomableImage
                     key={`${image}-${index}`}
                     src={image}
                     alt={`${artwork.title} ${index + 1}`}
-                    className="h-full min-h-[220px] w-full rounded-[1.2rem] object-cover"
+                    className="h-full min-h-[220px] rounded-[1.2rem]"
                   />
                 ))}
               </div>

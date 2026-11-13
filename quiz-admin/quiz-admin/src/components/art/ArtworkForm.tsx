@@ -89,15 +89,16 @@ export default function ArtworkForm({ categories, initial = {} }: Props) {
         </select>
       </div>
 
-      {/* Description */}
+      {/* Short description */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
+        <label className="block text-sm font-medium text-gray-300 mb-1">Short Description</label>
         <textarea
           value={form.description}
           onChange={e => set('description', e.target.value)}
           rows={4}
+          maxLength={280}
           className={inputCls}
-          placeholder="Artwork ke baare mein..."
+          placeholder="A short description of the artwork..."
         />
       </div>
 
