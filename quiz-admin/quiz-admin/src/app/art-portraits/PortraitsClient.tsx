@@ -3,20 +3,25 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { PORTRAIT_CATEGORIES } from '@/lib/portrait-categories'
+import LiveSearch from '@/components/public/LiveSearch'
 
 type Portrait = { id: string; title: string; image: string; category: string }
 
-export default function PortraitsClient({ portraits }: { portraits: Portrait[] }) {
+export default function PortraitsClient({ portraits, query }: { portraits: Portrait[]; query: string }) {
   const [activeCategory, setActiveCategory] = useState<string>('ALL')
 
-  const filtered = activeCategory === 'ALL' ? portraits : portraits.filter((p) => p.category === activeCategory)
+  const categoryFiltered = activeCategory === 'ALL' ? portraits : portraits.filter((p) => p.category === activeCategory)
+  const filtered = query
+    ? categoryFiltered.filter((p) => `${p.title} ${p.category.replaceAll('_', ' ')}`.toLowerCase().includes(query.toLowerCase()))
+    : categoryFiltered
 
   return (
     <div className="min-h-screen bg-gray-950 px-6 py-10">
       <h1 className="text-2xl font-bold text-gray-100 mb-1">Art & Portraits</h1>
       <p className="text-sm text-gray-500 mb-6">A collection of hand-crafted portraits</p>
+      <LiveSearch value={query} placeholder="Search portraits by title or category" />
 
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="mt-6 flex flex-wrap gap-2 mb-8">
         <button
           onClick={() => setActiveCategory('ALL')}
           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
@@ -39,7 +44,7 @@ export default function PortraitsClient({ portraits }: { portraits: Portrait[] }
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-gray-600">No portraits in this category yet.</p>
+        <p className="text-sm text-gray-600">{query ? 'No portraits match your search.' : 'No portraits in this category yet.'}</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
           {filtered.map((p) => (

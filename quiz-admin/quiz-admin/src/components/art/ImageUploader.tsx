@@ -5,9 +5,10 @@ import { X, Upload, Loader2 } from 'lucide-react'
 interface Props {
   value: string[]
   onChange: (urls: string[]) => void
+  maxImages?: number
 }
 
-export default function ImageUploader({ value, onChange }: Props) {
+export default function ImageUploader({ value, onChange, maxImages }: Props) {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -16,12 +17,13 @@ export default function ImageUploader({ value, onChange }: Props) {
     if (!files?.length) return
     setUploading(true)
     const form = new FormData()
-    Array.from(files).forEach(f => form.append('files', f))
+    const selectedFiles = maxImages ? Array.from(files).slice(0, maxImages) : Array.from(files)
+    selectedFiles.forEach(f => form.append('files', f))
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: form })
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error || 'Upload failed')
-      if (data.urls) onChange([...value, ...data.urls])
+      if (data.urls) onChange(maxImages ? data.urls.slice(0, maxImages) : [...value, ...data.urls])
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Upload failed')
     } finally {

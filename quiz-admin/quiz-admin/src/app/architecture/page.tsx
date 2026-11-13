@@ -1,11 +1,25 @@
 import Link from 'next/link'
+import { ArchitectureCategory } from '@prisma/client'
 import { prisma } from '@/lib/db'
+import LiveSearch from '@/components/public/LiveSearch'
 
 export const dynamic = 'force-dynamic'
 
-export default async function ArchitecturePage() {
+export default async function ArchitecturePage({ searchParams }: { searchParams: { q?: string } }) {
+  const q = searchParams.q?.trim() || ''
+  const category = Object.values(ArchitectureCategory).find(value => value.toLowerCase() === q.toLowerCase())
   const projects = await prisma.architectureProject.findMany({
-    where: { isPublished: true },
+    where: {
+      isPublished: true,
+      ...(q ? {
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
+          { location: { contains: q, mode: 'insensitive' } },
+          ...(category ? [{ category }] : []),
+        ],
+      } : {}),
+    },
     orderBy: { createdAt: 'desc' },
   })
 
@@ -15,11 +29,12 @@ export default async function ArchitecturePage() {
         <div className="mb-10">
           <p className="lm-mono mb-3 text-[0.68rem] text-[#ca6706]">Design</p>
           <h1 className="lm-display text-4xl text-[#171310] md:text-6xl">Architecture projects</h1>
+          <div className="mt-6"><LiveSearch value={q} placeholder="Search architecture by title, category, or location" /></div>
         </div>
 
         {projects.length === 0 ? (
           <div className="rounded-[2rem] border border-[#eadbc0] bg-white/60 p-8 text-[#5f564f]">
-            No architecture projects yet.
+            {q ? 'No architecture projects match your search.' : 'No architecture projects yet.'}
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Textarea } from '@/components/ui/Textarea'
 import { Button } from '@/components/ui/Button'
+import ImageUploader from '@/components/art/ImageUploader'
 
 interface QuizFormProps {
   initialData?: any
@@ -25,6 +26,7 @@ export function QuizForm({ initialData, mode }: QuizFormProps) {
     difficulty: initialData?.difficulty || 'MEDIUM',
     category: initialData?.category || 'General Knowledge',
     topic: initialData?.topic || '',
+    coverImage: initialData?.coverImage || '',
     timeLimit: initialData?.timeLimit ?? 30,
     negativeMarking: initialData?.negativeMarking ?? false,
     negativePenalty: initialData?.negativePenalty ?? 0.25,
@@ -114,6 +116,18 @@ export function QuizForm({ initialData, mode }: QuizFormProps) {
             value={form.topic}
             onChange={e => set('topic', e.target.value)}
             required
+          />
+        </div>
+
+        <div className="md:col-span-2 space-y-3">
+          <div>
+            <p className="text-sm font-medium text-gray-200">Quiz Cover Image</p>
+            <p className="mt-1 text-xs text-gray-500">This image is shown on the quiz listing and before the quiz starts.</p>
+          </div>
+          <ImageUploader
+            value={form.coverImage ? [form.coverImage] : []}
+            onChange={urls => set('coverImage', urls[0] || '')}
+            maxImages={1}
           />
         </div>
 

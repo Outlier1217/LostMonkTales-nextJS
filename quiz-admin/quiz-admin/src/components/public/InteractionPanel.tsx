@@ -2,6 +2,7 @@
 
 import { Heart, MessageCircle, Share2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { shareLink } from '@/lib/share'
 
 type TargetType = 'BLOG' | 'QUIZ' | 'COURSE' | 'ARTWORK' | 'PORTRAIT'
 type Comment = { id: string; body: string; user: { id: string }; replies?: Comment[] }
@@ -14,6 +15,7 @@ export function InteractionPanel({ targetType, targetId, title, result, shareOnl
   const [body, setBody] = useState('')
   const [replyTo, setReplyTo] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [shareError, setShareError] = useState(false)
 
   async function load() {
     const response = await fetch(`/api/interactions?targetType=${targetType}&targetId=${targetId}`)
@@ -47,15 +49,16 @@ export function InteractionPanel({ targetType, targetId, title, result, shareOnl
   }
 
   async function share() {
-    const ok = await send({ action: 'share', result })
-    if (!ok) return
-    const url = window.location.href
-    if (navigator.share) await navigator.share({ title, text: `Take a look at ${title}`, url }).catch(() => undefined)
-    else await navigator.clipboard?.writeText(url)
+    setShareError(false)
+    try {
+      await shareLink(title, `Take a look at ${title}`)
+    } catch {
+      setShareError(true)
+    }
   }
 
   if (shareOnly) {
-    return <button type="button" onClick={share} className="inline-flex items-center gap-2 rounded-full border border-[#c7b7a5] px-4 py-2 text-sm text-[#171310]"><Share2 className="h-4 w-4" />Share</button>
+    return <button type="button" onClick={share} className="inline-flex items-center gap-2 rounded-full border border-[#c7b7a5] px-4 py-2 text-sm text-[#171310]"><Share2 className="h-4 w-4" />{shareError ? 'Share failed' : 'Share'}</button>
   }
 
   const author = () => 'Member'
@@ -74,7 +77,7 @@ export function InteractionPanel({ targetType, targetId, title, result, shareOnl
         <button type="button" onClick={() => document.getElementById(`comment-${targetId}`)?.focus()} className="inline-flex items-center gap-2 rounded-full border border-[#c7b7a5] px-4 py-2 text-sm"><MessageCircle className="h-4 w-4" />Comment</button>
         <button type="button" onClick={share} className="inline-flex items-center gap-2 rounded-full border border-[#c7b7a5] px-4 py-2 text-sm"><Share2 className="h-4 w-4" />Share</button>
       </div>
-      {error && <p className="mt-3 text-sm text-red-700">{error}</p>}
+      {(error || shareError) && <p className="mt-3 text-sm text-red-700">{shareError ? 'Unable to share this link. Please try again.' : error}</p>}
       <div className="mt-6">
         <h2 className="font-serif text-2xl text-[#171310]">Comments</h2>
         <div className="mt-4 flex gap-2">

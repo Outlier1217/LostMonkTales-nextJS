@@ -43,6 +43,7 @@ function formatTime(seconds: number) {
 }
 
 export function QuizPlayer({ quiz }: QuizPlayerProps) {
+  const [started, setStarted] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [secondsLeft, setSecondsLeft] = useState(quiz.timeLimit > 0 ? quiz.timeLimit * 60 : null)
@@ -84,7 +85,7 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
   }
 
   useEffect(() => {
-    if (result || secondsLeft === null) return
+    if (!started || result || secondsLeft === null) return
     if (secondsLeft <= 0) {
       finishQuiz()
       return
@@ -95,7 +96,7 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
     }, 1000)
 
     return () => window.clearInterval(timer)
-  }, [result, secondsLeft])
+  }, [started, result, secondsLeft])
 
   if (quiz.questions.length === 0) {
     return (
@@ -171,6 +172,25 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
           </Link>
         </div>
         <InteractionPanel targetType="QUIZ" targetId={quiz.id} title={`${quiz.title} result`} result={result} shareOnly />
+      </div>
+    )
+  }
+
+  if (!started) {
+    return (
+      <div className="rounded-[2rem] border border-[#eadbc0] bg-[#f9e9d2] p-6 text-center md:p-10">
+        <p className="lm-mono text-[0.62rem] text-[#ca6706]">Ready when you are</p>
+        <h2 className="lm-display mt-3 text-3xl text-[#171310] md:text-4xl">Start this quiz</h2>
+        <p className="mx-auto mt-3 max-w-xl text-[#5f564f]">
+          Take your time, choose the best answer for each question, and review your result when you finish.
+        </p>
+        <button
+          type="button"
+          onClick={() => setStarted(true)}
+          className="mt-7 rounded-full bg-[#f2801c] px-6 py-3 text-sm font-semibold text-[#171310] transition hover:bg-[#ff9a3d]"
+        >
+          Start quiz
+        </button>
       </div>
     )
   }
