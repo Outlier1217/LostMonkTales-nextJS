@@ -10,6 +10,46 @@ fail() {
   exit 1
 }
 
+strip_prisma_database_url_parameters() {
+  local url="$1"
+  local base query suffix parameter key filtered_query=""
+  local -a parameters
+
+  if [[ "$url" != *\?* ]]; then
+    printf '%s' "$url"
+    return
+  fi
+
+  base="${url%%\?*}"
+  query="${url#*\?}"
+  suffix=""
+  if [[ "$query" == *#* ]]; then
+    suffix="#${query#*#}"
+    query="${query%%#*}"
+  fi
+
+  IFS='&' read -r -a parameters <<< "$query"
+  for parameter in "${parameters[@]}"; do
+    key="${parameter%%=*}"
+    case "$key" in
+      schema|connection_limit|pool_timeout|pgbouncer|statement_cache_size|socket_timeout|sslaccept|sslidentity|sslpassword)
+        continue
+        ;;
+    esac
+
+    if [[ -n "$filtered_query" ]]; then
+      filtered_query+="&"
+    fi
+    filtered_query+="$parameter"
+  done
+
+  if [[ -n "$filtered_query" ]]; then
+    printf '%s?%s%s' "$base" "$filtered_query" "$suffix"
+  else
+    printf '%s%s' "$base" "$suffix"
+  fi
+}
+
 trap 'printf "\nERROR: deployment failed on line %s\n" "$LINENO" >&2' ERR
 
 [[ "$PWD" == "$expected_dir" ]] || fail "Run pnpm deploy from $expected_dir (current directory: $PWD)."
@@ -35,8 +75,10 @@ database_url="${database_url%\'}"
 
 pg_dump_version="$(pg_dump --version)"
 pg_restore_version="$(pg_restore --version)"
-[[ "$pg_dump_version" =~ PostgreSQL[[:space:]]18([.]|$) ]] || fail "pg_dump must be PostgreSQL 18 (found: $pg_dump_version)."
-[[ "$pg_restore_version" =~ PostgreSQL[[:space:]]18([.]|$) ]] || fail "pg_restore must be PostgreSQL 18 (found: $pg_restore_version)."
+[[ "$pg_dump_version" =~ PostgreSQL\)[[:space:]]+18([.][0-9]+)?$ ]] || fail "pg_dump must be PostgreSQL 18 (found: $pg_dump_version)."
+[[ "$pg_restore_version" =~ PostgreSQL\)[[:space:]]+18([.][0-9]+)?$ ]] || fail "pg_restore must be PostgreSQL 18 (found: $pg_restore_version)."
+backup_database_url="$(strip_prisma_database_url_parameters "$database_url")"
+[[ -n "$backup_database_url" ]] || fail "DATABASE_URL is empty after removing Prisma-only parameters."
 
 printf 'Pulling latest main...\n'
 git pull --ff-only origin main
@@ -48,7 +90,7 @@ umask 077
 install -d -m 0700 "$backup_dir"
 backup_file="$backup_dir/lost_monk_tales_$(date -u +%Y%m%dT%H%M%SZ).dump"
 printf 'Creating PostgreSQL backup: %s\n' "$backup_file"
-pg_dump --format=custom --no-owner --file="$backup_file" "$database_url"
+pg_dump --format=custom --no-owner --file="$backup_file" "$backup_database_url"
 [[ -s "$backup_file" ]] || fail "Database backup is empty."
 printf 'Verifying backup with PostgreSQL 18 pg_restore...\n'
 pg_restore --list "$backup_file" >/dev/null
