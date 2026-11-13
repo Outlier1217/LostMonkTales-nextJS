@@ -39,6 +39,9 @@ export default async function QuizzesPage({ searchParams }: { searchParams: { q?
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {quizzes.map(quiz => (
               <Link key={quiz.id} href={`/quizzes/${quiz.id}`} className="group block rounded-[1.8rem] border border-[#eadbc0] bg-white/75 p-5 shadow-[0_18px_40px_rgba(23,19,16,0.04)] transition hover:-translate-y-1 hover:border-[#f2801c]">
+                {quiz.coverImage && (
+                  <img src={quiz.coverImage} alt="" className="mb-5 aspect-[16/9] w-full rounded-[1.2rem] object-cover" />
+                )}
                 <div className="mb-4 flex items-center justify-between gap-3 text-xs text-[#5f564f]">
                   <span className="lm-mono text-[0.62rem] text-[#ca6706]">{quiz.category}</span>
                   <span>{quiz.difficulty}</span>

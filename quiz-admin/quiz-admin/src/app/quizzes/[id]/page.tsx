@@ -40,6 +40,14 @@ export default async function QuizDetailPage({ params }: { params: { id: string 
             {quiz.description || 'A thoughtful challenge crafted from stories, details, and observation.'}
           </p>
 
+          {quiz.coverImage && (
+            <img
+              src={quiz.coverImage}
+              alt={`${quiz.title} cover`}
+              className="mt-8 max-h-[28rem] w-full rounded-[1.5rem] object-cover"
+            />
+          )}
+
           <div className="mt-8 grid gap-4 rounded-[1.5rem] border border-[#eddcc4] bg-[#f9e9d2] p-4 sm:grid-cols-3">
             <div>
               <p className="lm-mono text-[0.62rem] text-[#ca6706]">Questions</p>

@@ -59,6 +59,7 @@ model Quiz {
   difficulty      Difficulty    @default(MEDIUM)
   category        String
   topic           String
+  coverImage      String?
   timeLimit       Int // in minutes, 0 = no limit
   negativeMarking Boolean       @default(false)
   negativePenalty Float         @default(0.25) // fraction deducted per wrong answer
