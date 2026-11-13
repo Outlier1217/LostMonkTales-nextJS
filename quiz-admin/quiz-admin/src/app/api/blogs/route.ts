@@ -10,7 +10,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { title, category, topic, content, thumbnailUrl, youtubeUrl, isPublished } = body
+  const { title, category, topic, tags, hashtags, content, thumbnailUrl, youtubeUrl, isPublished } = body
 
   if (!title || !category || !topic || !content) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
       title,
       category,
       topic,
+      tags: tags || null,
+      hashtags: hashtags || null,
       content,
       thumbnailUrl: thumbnailUrl || null,
       youtubeUrl: youtubeUrl || null,
