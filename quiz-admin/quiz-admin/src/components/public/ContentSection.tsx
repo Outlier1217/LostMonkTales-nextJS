@@ -24,18 +24,43 @@ export default function ContentSection({
   eyebrow, title, items,
 }: { eyebrow: string; title: string; items: Item[] }) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [itemsPerSlide, setItemsPerSlide] = useState(1)
 
   useEffect(() => {
-    if (items.length < 2) return
+    const desktopQuery = window.matchMedia('(min-width: 1024px)')
+    const updateItemsPerSlide = () => setItemsPerSlide(desktopQuery.matches ? 3 : 1)
+
+    updateItemsPerSlide()
+    desktopQuery.addEventListener('change', updateItemsPerSlide)
+    return () => desktopQuery.removeEventListener('change', updateItemsPerSlide)
+  }, [])
+
+  const slideCount = Math.ceil(items.length / itemsPerSlide)
+  const slides = Array.from({ length: slideCount }, (_, pageIndex) => {
+    const start = pageIndex * itemsPerSlide
+    const slideItems = items.slice(start, start + itemsPerSlide)
+
+    if (items.length >= itemsPerSlide) {
+      for (let index = slideItems.length; index < itemsPerSlide; index++) {
+        slideItems.push(items[(start + index) % items.length])
+      }
+    }
+
+    return slideItems
+  })
+  const visibleSlideIndex = slideCount ? activeIndex % slideCount : 0
+
+  useEffect(() => {
+    if (slideCount < 2) return
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReducedMotion) return
 
     const interval = window.setInterval(() => {
-      setActiveIndex(current => (current + 1) % items.length)
+      setActiveIndex(current => (current + 1) % slideCount)
     }, 4500)
     return () => window.clearInterval(interval)
-  }, [items.length])
+  }, [slideCount])
 
   if (items.length === 0) return null
 
@@ -57,37 +82,41 @@ export default function ContentSection({
       <div className="overflow-hidden" aria-live="polite">
         <div
           className="flex transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
-          style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+          style={{ transform: `translateX(-${visibleSlideIndex * 100}%)` }}
         >
-          {items.map(item => (
-            <div key={item.id} className="min-w-full px-1">
-              <Link href={item.href} className="group mx-auto block max-w-md overflow-hidden rounded-[1.6rem] border border-[#eadcc3] bg-white/80 shadow-[0_18px_50px_rgba(23,19,16,0.04)] transition duration-300 hover:-translate-y-1 hover:border-[#f2801c] hover:shadow-[0_24px_60px_rgba(23,19,16,0.1)]">
-                <div className="relative aspect-[4/5] overflow-hidden bg-[#f9e9d2]">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center bg-[radial-gradient(circle,_rgba(242,128,28,0.22),_rgba(242,128,28,0.06)_45%,_rgba(23,19,16,0.04)_100%)] text-sm font-medium uppercase tracking-[0.16em] text-[#5f564f]">
-                      Lost Monk Tales
+          {slides.map((slide, pageIndex) => (
+            <div key={pageIndex} className="w-full min-w-full shrink-0 px-1">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                {slide.map(item => (
+                  <Link key={item.id} href={item.href} className="group block h-full overflow-hidden rounded-[1.6rem] border border-[#eadcc3] bg-white/80 shadow-[0_18px_50px_rgba(23,19,16,0.04)] transition duration-300 hover:-translate-y-1 hover:border-[#f2801c] hover:shadow-[0_24px_60px_rgba(23,19,16,0.1)]">
+                    <div className="relative aspect-[4/5] overflow-hidden bg-[#f9e9d2]">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center bg-[radial-gradient(circle,_rgba(242,128,28,0.22),_rgba(242,128,28,0.06)_45%,_rgba(23,19,16,0.04)_100%)] text-sm font-medium uppercase tracking-[0.16em] text-[#5f564f]">
+                          Lost Monk Tales
+                        </div>
+                      )}
+                      {item.tag && (
+                        <span className="absolute left-4 top-4 rounded-full bg-[#171310]/80 px-2.5 py-1 text-[0.6rem] font-medium uppercase tracking-[0.12em] text-[#f7f2eb] backdrop-blur-sm">
+                          {item.tag}
+                        </span>
+                      )}
                     </div>
-                  )}
-                  {item.tag && (
-                    <span className="absolute left-4 top-4 rounded-full bg-[#171310]/80 px-2.5 py-1 text-[0.6rem] font-medium uppercase tracking-[0.12em] text-[#f7f2eb] backdrop-blur-sm">
-                      {item.tag}
-                    </span>
-                  )}
-                </div>
 
-                <div className="p-4">
-                  <h3 className="lm-display text-2xl leading-tight text-[#171310] transition group-hover:text-[#ca6706]">
-                    {item.title}
-                  </h3>
-                  {item.meta && <p className="mt-2 text-sm text-[#5f564f]">{item.meta}</p>}
-                </div>
-              </Link>
+                    <div className="p-4">
+                      <h3 className="lm-display text-2xl leading-tight text-[#171310] transition group-hover:text-[#ca6706]">
+                        {item.title}
+                      </h3>
+                      {item.meta && <p className="mt-2 text-sm text-[#5f564f]">{item.meta}</p>}
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           ))}
         </div>

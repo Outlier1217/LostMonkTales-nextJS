@@ -62,16 +62,31 @@ command -v curl >/dev/null || fail "curl is required."
 command -v pg_dump >/dev/null || fail "PostgreSQL 18 pg_dump is required."
 command -v pg_restore >/dev/null || fail "PostgreSQL 18 pg_restore is required."
 
-for variable in DATABASE_URL AUTH_SECRET ADMIN_USERNAME ADMIN_PASSWORD FILE_SERVER_INTERNAL_URL FILE_SERVER_PUBLIC_URL COURSE_FILE_STORAGE_DIR COURSE_MAX_FILE_SIZE_BYTES COURSE_STORAGE_QUOTA_BYTES; do
+for variable in DATABASE_URL MIGRATION_DATABASE_URL AUTH_SECRET ADMIN_USERNAME ADMIN_PASSWORD FILE_SERVER_INTERNAL_URL FILE_SERVER_PUBLIC_URL COURSE_FILE_STORAGE_DIR COURSE_MAX_FILE_SIZE_BYTES COURSE_STORAGE_QUOTA_BYTES; do
   grep -Eq "^${variable}=[^[:space:]]" .env || fail "Required .env variable is missing or empty: ${variable}"
 done
 
 database_url="$(awk -F= '$1 == "DATABASE_URL" { sub(/^[^=]*=/, ""); print; exit }' .env)"
+migration_database_url="$(awk -F= '$1 == "MIGRATION_DATABASE_URL" { sub(/^[^=]*=/, ""); print; exit }' .env)"
 database_url="${database_url#\"}"
 database_url="${database_url%\"}"
 database_url="${database_url#\'}"
 database_url="${database_url%\'}"
+migration_database_url="${migration_database_url#\"}"
+migration_database_url="${migration_database_url%\"}"
+migration_database_url="${migration_database_url#\'}"
+migration_database_url="${migration_database_url%\'}"
 [[ -n "$database_url" ]] || fail "DATABASE_URL could not be read from .env."
+[[ -n "$migration_database_url" ]] || fail "MIGRATION_DATABASE_URL could not be read from .env."
+
+database_user="${database_url#*://}"
+database_user="${database_user%%@*}"
+database_user="${database_user%%:*}"
+migration_user="${migration_database_url#*://}"
+migration_user="${migration_user%%@*}"
+migration_user="${migration_user%%:*}"
+[[ -n "$database_user" && -n "$migration_user" ]] || fail "Database roles could not be identified from the configured URLs."
+[[ "$database_user" != "$migration_user" ]] || fail "MIGRATION_DATABASE_URL must use a separate role from DATABASE_URL."
 
 pg_dump_version="$(pg_dump --version)"
 pg_restore_version="$(pg_restore --version)"
@@ -96,7 +111,7 @@ printf 'Verifying backup with PostgreSQL 18 pg_restore...\n'
 pg_restore --list "$backup_file" >/dev/null
 
 printf 'Applying migrations...\n'
-pnpm exec prisma migrate deploy
+DATABASE_URL="$migration_database_url" pnpm exec prisma migrate deploy
 printf 'Generating Prisma Client...\n'
 pnpm exec prisma generate
 

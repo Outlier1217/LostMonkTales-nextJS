@@ -9,12 +9,20 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { title, image, category, isPublished } = await req.json()
+    const { title, description, image, category, isPublished } = await req.json()
+
+    if (description !== undefined && description !== null &&
+      (typeof description !== 'string' || description.length > 280)) {
+      return NextResponse.json({ error: 'description must be 280 characters or fewer' }, { status: 400 })
+    }
 
     const portrait = await prisma.portrait.update({
       where: { id: params.id },
       data: {
         ...(title !== undefined ? { title } : {}),
+        ...(description !== undefined
+          ? { description: typeof description === 'string' && description.trim() ? description.trim() : null }
+          : {}),
         ...(image !== undefined ? { image } : {}),
         ...(category !== undefined ? { category } : {}),
         ...(isPublished !== undefined ? { isPublished } : {}),

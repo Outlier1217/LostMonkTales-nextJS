@@ -29,6 +29,7 @@ export function QuizForm({ initialData, mode }: QuizFormProps) {
     negativePenalty: initialData?.negativePenalty ?? 0.25,
     passingPercent: initialData?.passingPercent ?? 60,
     isPublished: initialData?.isPublished ?? false,
+    isFeatured: initialData?.isFeatured ?? false,
   })
 
   const set = (key: string, value: any) => setForm(f => ({ ...f, [key]: value }))
@@ -207,7 +208,7 @@ export function QuizForm({ initialData, mode }: QuizFormProps) {
         )}
       </div>
 
-      {/* Publish Status */}
+      {/* Publication and homepage feature */}
       <div className="flex items-center gap-3 p-4 bg-gray-900 border border-gray-800 rounded-xl">
         <input
           type="checkbox"
@@ -218,9 +219,25 @@ export function QuizForm({ initialData, mode }: QuizFormProps) {
         />
         <div>
           <label htmlFor="isPublished" className="text-sm font-medium text-gray-200 cursor-pointer">
+            Publish on Take Quizzes
+          </label>
+          <p className="text-xs text-gray-500">Unpublished quizzes remain drafts and are hidden from public pages.</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 p-4 bg-gray-900 border border-gray-800 rounded-xl">
+        <input
+          type="checkbox"
+          id="isFeatured"
+          checked={form.isFeatured}
+          onChange={e => set('isFeatured', e.target.checked)}
+          className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-violet-600 focus:ring-violet-500"
+        />
+        <div>
+          <label htmlFor="isFeatured" className="text-sm font-medium text-gray-200 cursor-pointer">
             Feature on homepage
           </label>
-          <p className="text-xs text-gray-500">Featured quizzes appear in the homepage collection</p>
+          <p className="text-xs text-gray-500">Featured published quizzes also appear in the homepage collection.</p>
         </div>
       </div>
 

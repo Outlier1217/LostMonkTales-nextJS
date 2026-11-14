@@ -11,7 +11,7 @@ export default async function HomePage() {
   const [blogs, quizzes, artworks, portraits, architectureProjects, courses] = await Promise.all([
     prisma.blog.findMany({ where: { isPublished: true }, orderBy: { createdAt: 'desc' } }),
     prisma.quiz.findMany({
-      where: { isPublished: true },
+      where: { isPublished: true, isFeatured: true },
       orderBy: { createdAt: 'desc' },
       include: { _count: { select: { questions: true } } },
     }),

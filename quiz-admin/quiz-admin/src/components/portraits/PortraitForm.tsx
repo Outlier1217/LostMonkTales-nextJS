@@ -11,6 +11,7 @@ interface PortraitFormProps {
   initialData?: {
     id: string
     title: string
+    description: string | null
     image: string
     category: PortraitCategoryValue
     isPublished: boolean
@@ -20,6 +21,7 @@ interface PortraitFormProps {
 export default function PortraitForm({ initialData }: PortraitFormProps) {
   const router = useRouter()
   const [title, setTitle] = useState(initialData?.title ?? '')
+  const [description, setDescription] = useState(initialData?.description ?? '')
   const [image, setImage] = useState(initialData?.image ?? '')
   const [category, setCategory] = useState<PortraitCategoryValue>(
     initialData?.category ?? PORTRAIT_CATEGORIES[0].value
@@ -43,7 +45,7 @@ export default function PortraitForm({ initialData }: PortraitFormProps) {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, image, category, isPublished }),
+        body: JSON.stringify({ title, description, image, category, isPublished }),
       })
 
       if (!res.ok) throw new Error('Save failed')
@@ -69,6 +71,20 @@ export default function PortraitForm({ initialData }: PortraitFormProps) {
           placeholder="e.g. Portrait of a Wanderer"
           className="w-full bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:border-violet-600"
         />
+      </div>
+
+      <div>
+        <label className="block text-sm text-gray-400 mb-1.5" htmlFor="description">Short description</label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="A short description of this artwork"
+          maxLength={280}
+          rows={3}
+          className="w-full resize-y bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:border-violet-600"
+        />
+        <p className="mt-1 text-xs text-gray-500">Shown with the title in the public portrait gallery.</p>
       </div>
 
       <div>

@@ -13,7 +13,7 @@ const navItems = [
   { href: '/courses', label: 'Courses' },
   { href: '/art-portraits', label: 'Art' },
   { href: '/architecture', label: 'Architecture' },
-  { href: '/store', label: 'Store' },
+  { href: '/store', label: 'LM Store' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]

@@ -9,9 +9,10 @@ type FeatureToggleProps = {
   featured: boolean
   endpoint: string
   method?: 'PATCH' | 'PUT'
+  field?: 'isPublished' | 'isFeatured'
 }
 
-export default function FeatureToggle({ id, featured, endpoint, method = 'PATCH' }: FeatureToggleProps) {
+export default function FeatureToggle({ id, featured, endpoint, method = 'PATCH', field = 'isPublished' }: FeatureToggleProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
@@ -21,7 +22,7 @@ export default function FeatureToggle({ id, featured, endpoint, method = 'PATCH'
       const response = await fetch(`${endpoint}/${id}`, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPublished: !featured }),
+        body: JSON.stringify({ [field]: !featured }),
       })
       if (!response.ok) throw new Error('Unable to update homepage feature')
       router.refresh()

@@ -13,6 +13,7 @@ export default async function EditPortraitPage({ params }: { params: { id: strin
         initialData={{
           id: portrait.id,
           title: portrait.title,
+          description: portrait.description,
           image: portrait.image,
           category: portrait.category,
           isPublished: portrait.isPublished,

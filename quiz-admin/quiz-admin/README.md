@@ -125,6 +125,11 @@ src/
 └── lib/
 ```
 
+## Quiz visibility
+
+Published quizzes appear on the Take Quizzes page. The admin's Featured setting controls only
+whether a published quiz also appears on the homepage; drafts stay hidden until published.
+
 ---
 
 ## Image Storage Architecture
@@ -183,21 +188,22 @@ Set the following in the VPS application's environment (never commit these value
 
 ```env
 DATABASE_URL=postgresql://<user>:<password>@127.0.0.1:5433/lost_monk_tales
+MIGRATION_DATABASE_URL=postgresql://<ddl-owner>:<password>@127.0.0.1:5433/lost_monk_tales
 COURSE_FILE_STORAGE_DIR=/var/lib/lost-monk-tales/course-resources
 COURSE_MAX_FILE_SIZE_BYTES=104857600
 COURSE_STORAGE_QUOTA_BYTES=0
 ```
 
-After backing up the production database, deploy the reviewed migration from the application
-directory. Do not run this against production from Codespaces:
+`DATABASE_URL` is the runtime application role. `MIGRATION_DATABASE_URL` must use a separate
+role with DDL permissions (for example, the existing owner role for the affected tables). Do
+not make the application role a superuser or change table ownership automatically.
+
+Run the reviewed deployment script on the VPS; it backs up the database, uses
+`MIGRATION_DATABASE_URL` only for migrations, then builds and restarts the application. Do not
+run this against production from Codespaces:
 
 ```bash
-pnpm install --frozen-lockfile
-pnpm exec prisma migrate deploy
-pnpm exec prisma generate
-pnpm build
-pm2 restart <pm2-app-name> --update-env
-curl -fsS http://127.0.0.1:3030/courses >/dev/null
+pnpm deploy
 sudo -u <app-user> sh -c 'printf persistent-check > /var/lib/lost-monk-tales/course-resources/.deployment-check && test -s /var/lib/lost-monk-tales/course-resources/.deployment-check'
 pm2 restart <pm2-app-name> --update-env
 sudo -u <app-user> test -s /var/lib/lost-monk-tales/course-resources/.deployment-check
@@ -269,6 +275,7 @@ model ArchitectureProject {
 
 ```env
 DATABASE_URL=postgresql://<user>:<password>@127.0.0.1:5433/lost_monk_tales
+MIGRATION_DATABASE_URL=postgresql://<ddl-owner>:<password>@127.0.0.1:5433/lost_monk_tales
 AUTH_SECRET=<long-random-secret>
 ADMIN_USERNAME=<admin-username>
 ADMIN_PASSWORD=<admin-password>

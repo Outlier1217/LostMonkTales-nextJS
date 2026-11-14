@@ -65,13 +65,16 @@ export default async function QuizzesPage() {
                     </span>
                   </td>
                   <td className="p-4">
-                    <Badge variant={quiz.isPublished ? 'published' : 'draft'}>
-                      {quiz.isPublished ? 'Featured' : 'Not featured'}
-                    </Badge>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant={quiz.isPublished ? 'published' : 'draft'}>
+                        {quiz.isPublished ? 'Published' : 'Draft'}
+                      </Badge>
+                      {quiz.isFeatured && <Badge variant="published">Featured</Badge>}
+                    </div>
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2 justify-end">
-                      <FeatureToggle id={quiz.id} featured={quiz.isPublished} endpoint="/api/quizzes" method="PUT" />
+                      <FeatureToggle id={quiz.id} featured={quiz.isFeatured} endpoint="/api/quizzes" method="PUT" field="isFeatured" />
                       <Link href={`/admin/quizzes/${quiz.id}`}>
                         <Button variant="ghost" size="sm"><Pencil className="w-3.5 h-3.5" /></Button>
                       </Link>

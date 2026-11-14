@@ -28,6 +28,7 @@ export default async function PortraitDetailPage({ params }: { params: { id: str
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-5 pb-6 pt-20 md:px-10 md:pb-8">
         <p className="text-xs uppercase tracking-[0.2em] text-white/60">{portrait.category.replaceAll('_', ' ')}</p>
         <h1 className="mt-2 text-2xl font-semibold text-white md:text-3xl">{portrait.title}</h1>
+        {portrait.description && <p className="mt-2 max-w-2xl text-sm leading-6 text-white/80">{portrait.description}</p>}
       </div>
       <div className="absolute right-4 top-4 md:right-8 md:top-8"><InteractionPanel targetType="PORTRAIT" targetId={portrait.id} title={portrait.title} shareOnly /></div>
     </main>

@@ -67,6 +67,7 @@ model Quiz {
   negativePenalty Float         @default(0.25) // fraction deducted per wrong answer
   passingPercent  Float         @default(60.0)
   isPublished     Boolean       @default(false)
+  isFeatured      Boolean       @default(false)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   questions       Question[]
@@ -360,6 +361,7 @@ enum PortraitCategory {
 model Portrait {
   id          String           @id @default(cuid())
   title       String
+  description String?
   image       String
   category    PortraitCategory
   isPublished Boolean          @default(false)

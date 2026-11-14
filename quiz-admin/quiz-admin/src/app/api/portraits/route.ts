@@ -19,14 +19,25 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { title, image, category, isPublished } = await req.json()
+    const { title, description, image, category, isPublished } = await req.json()
+
+    if (description !== undefined && description !== null &&
+      (typeof description !== 'string' || description.length > 280)) {
+      return NextResponse.json({ error: 'description must be 280 characters or fewer' }, { status: 400 })
+    }
 
     if (!title || !image || !category) {
       return NextResponse.json({ error: 'title, image and category are required' }, { status: 400 })
     }
 
     const portrait = await prisma.portrait.create({
-      data: { title, image, category, isPublished: isPublished ?? true },
+      data: {
+        title,
+        description: typeof description === 'string' && description.trim() ? description.trim() : null,
+        image,
+        category,
+        isPublished: isPublished ?? true,
+      },
     })
 
     return NextResponse.json(portrait, { status: 201 })
