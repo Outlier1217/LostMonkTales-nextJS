@@ -64,6 +64,8 @@ export default async function HomePage() {
           href: `/quizzes/${q.id}`,
           title: q.title,
           meta: `${q.category} · ${q._count.questions} questions`,
+          image: q.coverImage || undefined,
+          imageAspect: q.coverImage ? 'video' : undefined,
           tag: q.difficulty,
         }))}
       />
